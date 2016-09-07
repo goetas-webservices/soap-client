@@ -13,22 +13,20 @@
          stopOnFailure="false"
          stopOnIncomplete="false"
          stopOnSkipped="false"
-         
+
          verbose="false">
-         
+
     <testsuites>
         <testsuite>
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
-    
+
 <filter>
   <whitelist>
     <directory>src</directory>
-      <directory>common</directory>
-      <directory>client</directory>
   </whitelist>
-  </filter>  
+  </filter>
 
 </phpunit>
 
