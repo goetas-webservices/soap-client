@@ -7,14 +7,14 @@ use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ServerException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\SoapException;
-use GoetasWebservices\SoapServices\SoapClient\Message\MessageFactoryInterface;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreator;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreatorInterface;
 use GoetasWebservices\SoapServices\SoapCommon as SoapCommon;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\SoapServices\SoapEnvelope;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
+use Http\Client\Exception\HttpException;
+use Http\Client\HttpClient;
+use Http\Message\MessageFactory;
 use JMS\Serializer\Serializer;
 
 class Client
@@ -29,12 +29,12 @@ class Client
      */
     protected $serviceDefinition;
     /**
-     * @var ClientInterface
+     * @var HttpClient
      */
     protected $client;
 
     /**
-     * @var MessageFactoryInterface
+     * @var MessageFactory
      */
     protected $messageFactory;
 
@@ -49,7 +49,7 @@ class Client
     private $argumentsReader;
 
 
-    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactoryInterface $messageFactory, ClientInterface $client, $unwrap = false)
+    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, $unwrap = false)
     {
         $this->serviceDefinition = $serviceDefinition;
         $this->serializer = $serializer;
@@ -58,7 +58,6 @@ class Client
         $this->messageFactory = $messageFactory;
         $this->argumentsReader = new ArgumentsReader($this->serializer);
         $this->resultCreator = new ResultCreator($this->serializer, $unwrap);
-
     }
 
     public function __call($functionName, array $args)
@@ -72,10 +71,10 @@ class Client
         $xmlMessage = $this->serializer->serialize($message, 'xml');
         $headers = $this->buildHeaders($soapOperation);
 
-        $request = $this->messageFactory->getRequest($this->serviceDefinition['endpoint'], $xmlMessage, $headers);
+        $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
 
         try {
-            $response = $this->client->send($request);
+            $response = $this->client->sendRequest($request);
             if (strpos($response->getHeaderLine('Content-Type'), 'text/xml') !== 0) {
                 throw new ServerException(
                     $response,
@@ -89,7 +88,7 @@ class Client
                 return null;
             }
             $response = $this->serializer->deserialize((string)$response->getBody(), $soapOperation['output']['message_fqcn'], 'xml');
-        } catch (BadResponseException $e) {
+        } catch (HttpException $e) {
 
             if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'text/xml') === 0) {
                 $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), Fault::class, 'xml');

@@ -1,14 +1,14 @@
 <?php
 namespace GoetasWebservices\SoapServices\SoapClient;
 
-use GoetasWebservices\SoapServices\SoapClient\Message\DiactorosFactory;
-use GoetasWebservices\SoapServices\SoapClient\Message\GuzzleFactory;
-use GoetasWebservices\SoapServices\SoapClient\Message\MessageFactoryInterface;
 use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGeneratorInterface;
 use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
 use GoetasWebservices\XML\WSDLReader\Exception\ServiceNotFoundException;
-use GuzzleHttp\ClientInterface;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Message\MessageFactory;
 use JMS\Serializer\SerializerInterface;
 
 class ClientFactory
@@ -20,14 +20,14 @@ class ClientFactory
      */
     protected $serializer;
     /**
-     * @var MessageFactoryInterface
+     * @var MessageFactory
      */
     protected $messageFactory;
 
     /**
-     * @var ClientInterface
+     * @var HttpClient
      */
-    protected $client;
+    protected $httpClient;
 
     /**
      * @var PhpMetadataGeneratorInterface
@@ -50,15 +50,15 @@ class ClientFactory
         $this->unwrap = !!$unwrap;
     }
 
-    public function setHttpClient(ClientInterface $client)
+    public function setHttpClient(HttpClient $client)
     {
-        $this->client = $client;
+        $this->httpClient = $client;
     }
 
     /**
-     * @param MessageFactoryInterfaceFactory $messageFactory
+     * @param MessageFactory $messageFactory
      */
-    public function setMessageFactory(MessageFactoryInterfaceFactory $messageFactory)
+    public function setMessageFactory(MessageFactory $messageFactory)
     {
         $this->messageFactory = $messageFactory;
     }
@@ -103,22 +103,11 @@ class ClientFactory
     {
         $service = $this->getSoapService($wsdl, $portName, $serviceName);
 
-        $this->client = $this->client ?: new \GuzzleHttp\Client();
-        $this->messageFactory = $this->messageFactory ?: self::getDefaultHttpFactory();
+        $this->httpClient = $this->httpClient ?: HttpClientDiscovery::find();
+        $this->messageFactory = $this->messageFactory ?: MessageFactoryDiscovery::find();
         $unwrap = is_null($unwrap) ? $this->unwrap : $unwrap;
 
-        return new Client($service, $this->serializer, $this->messageFactory, $this->client, $unwrap);
-    }
-
-    private static function getDefaultHttpFactory()
-    {
-        if (class_exists('GuzzleHttp\Psr7\Request')) {
-            return new GuzzleFactory();
-        }
-        if (class_exists('Zend\Diactoros\Request')) {
-            return new DiactorosFactory();
-        }
-        throw new \Exception("Can not find a PSR-7 compatible implementation");
+        return new Client($service, $this->serializer, $this->messageFactory, $this->httpClient, $unwrap);
     }
 
     /**

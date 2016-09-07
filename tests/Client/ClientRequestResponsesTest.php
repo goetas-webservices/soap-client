@@ -8,6 +8,7 @@ use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GuzzleHttp\Client;
+use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -69,7 +70,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $guzzle = new Client(['handler' => $handler]);
 
         $this->factory = new ClientFactory($namespaces, $serializer);
-        $this->factory->setHttpClient($guzzle);
+        $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
 
         $metadataGenerator = new PhpMetadataGenerator($namespaces);
         $this->factory->setMetadataGenerator($metadataGenerator);
