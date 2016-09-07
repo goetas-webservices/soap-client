@@ -1,0 +1,38 @@
+{
+  "name": "goetas-webservices/soap-client",
+  "authors": [
+    {
+      "name": "Asmir Mustafic",
+      "email": "goetas@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^5.5|^7.0",
+    "goetas-webservices/soap-common": "^0.1",
+    "psr/http-message": "^1.0",
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "require-dev": {
+    "zendframework/zend-diactoros": "^1.3",
+    "phpunit/phpunit": "^4.8|^5.0",
+    "goetas-webservices/xsd2php": "^0.1",
+    "goetas-webservices/wsdl2php": "^0.1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "GoetasWebservices\\SoapServices\\SoapClient\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "GoetasWebservices\\SoapServices\\SoapClient\\Tests\\": "tests",
+      "GoetasWebservices\\Xsd\\XsdToPhp\\Tests\\": "vendor/goetas-webservices/xsd2php/tests",
+      "GoetasWebservices\\WsdlToPhp\\Tests\\": "vendor/goetas-webservices/wsdl2php/tests"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.1-dev"
+    }
+  }
+}
