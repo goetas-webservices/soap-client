@@ -8,11 +8,11 @@ use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GuzzleHttp\Client;
-use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use Psr\Http\Message\ResponseInterface;
 
 class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
@@ -133,11 +133,9 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
 
         $client->noInput("foo");
-        $this->assertTrue(
-            strpos(
-                $this->requestResponseStack[0]['request']->getBody(),
-                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>'
-            ) !== false
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
+            (string)$this->requestResponseStack[0]['request']->getBody()
         );
     }
 
@@ -154,14 +152,81 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $response = $client->noBoth("foo");
         $this->assertNull($response);
-        $this->assertTrue(
-            strpos(
-                $this->requestResponseStack[0]['request']->getBody(),
-                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>'
-            ) !== false
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
+            (string)$this->requestResponseStack[0]['request']->getBody()
         );
     }
 
+    public function testReturnMultiParam()
+    {
+        $this->responseMock->append(
+            new Response(
+                200,
+                ['Content-Type' => 'text/xml'],
+                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getReturnMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <out><![CDATA[foo]]></out>
+                </ns-b3c6b39d:getReturnMultiParamResponse>
+                <other-param><![CDATA[str]]></other-param>
+              </SOAP:Body>
+            </SOAP:Envelope>'
+            )
+        );
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+
+        $mp = new \Ex\GetReturnMultiParam();
+        $mp->setIn("foo");
+        $return = $client->getReturnMultiParam($mp);
+        $this->assertCount(2, $return);
+        $this->assertEquals($return['otherParam'], "str");
+        $this->assertInstanceOf(\Ex\GetReturnMultiParamResponse::class, $return['parameters']);
+        $this->assertEquals($return['parameters']->getOut(), "foo");
+
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getReturnMultiParam>
+              </SOAP:Body>
+            </SOAP:Envelope>',
+            (string)$this->requestResponseStack[0]['request']->getBody());
+    }
+
+    public function testMultiParamRequest()
+    {
+        $this->responseMock->append(
+            new Response(
+                200,
+                ['Content-Type' => 'text/xml'],
+                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <out><![CDATA[A]]></out>
+                </ns-b3c6b39d:getMultiParamResponse>
+              </SOAP:Body>
+            </SOAP:Envelope>'
+            )
+        );
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+
+        $mp = new \Ex\GetMultiParam();
+        $mp->setIn("foo");
+        $client->getMultiParam($mp, "str");
+
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getMultiParam>
+                <other-param><![CDATA[str]]></other-param>
+              </SOAP:Body>
+            </SOAP:Envelope>',
+            (string)$this->requestResponseStack[0]['request']->getBody());
+    }
 
     public function getErrorResponses()
     {

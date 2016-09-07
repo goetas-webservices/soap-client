@@ -1,6 +1,7 @@
 <?php
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments;
 
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Instantiator\Instantiator;
 use JMS\Serializer\Serializer;
 
@@ -33,15 +34,23 @@ class ArgumentsReader implements ArgumentsReaderInterface
         $classMetadata = $factory->getMetadataForClass($input['part_fqcn']);
 
         if (count($input['parts']) > 1) {
+
+            if (count($input['parts']) !== count($args)) {
+                throw new \Exception("Expected to have exactly " . count($input['parts']) . " arguments, supplied " . count($args));
+            }
+
             foreach ($input['parts'] as $paramName) {
-                $propertyMetadata = $classMetadata->propertyMetadata[$paramName];
-                $propertyMetadata->setValue($instance, $args[$paramName]);
+                //@todo $propertyName should use the xsd2php naming strategy (or do in the metadata extractor)
+                $propertyName = Inflector::camelize(str_replace(".", " ", $paramName));
+                $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
+                $propertyMetadata->setValue($instance, array_shift($args));
             }
             return $instance;
         }
 
-        $propertyMetadata = $classMetadata->propertyMetadata[reset($input['parts'])];
-        if (count($args) === 1 && $args[0] instanceof $propertyMetadata->type['name']) {
+        $propertyName = Inflector::camelize(str_replace(".", " ", reset($input['parts'])));
+        $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
+        if ($args[0] instanceof $propertyMetadata->type['name']) {
             $propertyMetadata->setValue($instance, reset($args));
             return $instance;
         }
