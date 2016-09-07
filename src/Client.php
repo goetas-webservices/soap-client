@@ -19,7 +19,6 @@ use JMS\Serializer\Serializer;
 
 class Client
 {
-    use SoapCommon\ResultWrapperTrait;
     /**
      * @var Serializer
      */
@@ -64,9 +63,7 @@ class Client
     {
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
 
-        $object = $this->argumentsReader->readArguments($args, $soapOperation['input']);
-
-        $message = $this->wrapResult($this->serializer, $object, $soapOperation['input']['message_fqcn']);
+        $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
         $xmlMessage = $this->serializer->serialize($message, 'xml');
         $headers = $this->buildHeaders($soapOperation);

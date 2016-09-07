@@ -24,13 +24,16 @@ class ArgumentsReader implements ArgumentsReaderInterface
      */
     public function readArguments(array $args, array $input)
     {
+        $instantiator = new Instantiator();
+        $envelope = $instantiator->instantiate($input['message_fqcn']);
+
         if (!count($input['parts'])) {
-            return null;
+            return $envelope;
         }
 
-        $instantiator = new Instantiator();
+        $body = $instantiator->instantiate($input['part_fqcn']);
+        $envelope->setBody($body);
         $factory = $this->serializer->getMetadataFactory();
-        $instance = $instantiator->instantiate($input['part_fqcn']);
         $classMetadata = $factory->getMetadataForClass($input['part_fqcn']);
 
         if (count($input['parts']) > 1) {
@@ -43,21 +46,21 @@ class ArgumentsReader implements ArgumentsReaderInterface
                 //@todo $propertyName should use the xsd2php naming strategy (or do in the metadata extractor)
                 $propertyName = Inflector::camelize(str_replace(".", " ", $paramName));
                 $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
-                $propertyMetadata->setValue($instance, array_shift($args));
+                $propertyMetadata->setValue($body, array_shift($args));
             }
-            return $instance;
+            return $envelope;
         }
 
         $propertyName = Inflector::camelize(str_replace(".", " ", reset($input['parts'])));
         $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
         if ($args[0] instanceof $propertyMetadata->type['name']) {
-            $propertyMetadata->setValue($instance, reset($args));
-            return $instance;
+            $propertyMetadata->setValue($body, reset($args));
+            return $envelope;
         }
 
         $instance2 = $instantiator->instantiate($propertyMetadata->type['name']);
         $classMetadata2 = $factory->getMetadataForClass($propertyMetadata->type['name']);
-        $propertyMetadata->setValue($instance, $instance2);
+        $propertyMetadata->setValue($body, $instance2);
 
         foreach ($classMetadata2->propertyMetadata as $propertyMetadata2) {
             if (!count($args)) {
@@ -66,6 +69,6 @@ class ArgumentsReader implements ArgumentsReaderInterface
             $value = array_pop($args);
             $propertyMetadata2->setValue($instance2, $value);
         }
-        return $instance;
+        return $envelope;
     }
 }
