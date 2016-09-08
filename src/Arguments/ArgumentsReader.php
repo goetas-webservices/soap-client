@@ -3,6 +3,9 @@ namespace GoetasWebservices\SoapServices\SoapClient\Arguments;
 
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Instantiator\Instantiator;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderPlaceholder;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use JMS\Serializer\Serializer;
 
 class ArgumentsReader implements ArgumentsReaderInterface
@@ -11,10 +14,15 @@ class ArgumentsReader implements ArgumentsReaderInterface
      * @var Serializer
      */
     private $serializer;
+    /**
+     * @var HeaderHandler
+     */
+    private $headerHandler;
 
-    public function __construct(Serializer $serializer)
+    public function __construct(Serializer $serializer, HeaderHandler $headerHandler)
     {
         $this->serializer = $serializer;
+        $this->headerHandler = $headerHandler;
     }
 
     /**
@@ -24,8 +32,39 @@ class ArgumentsReader implements ArgumentsReaderInterface
      */
     public function readArguments(array $args, array $input)
     {
+
+        $envelope = array_filter($args, function ($item) use ($input) {
+            return $item instanceof $input['message_fqcn'];
+        });
+        if ($envelope) {
+            return reset($envelope);
+        }
+
         $instantiator = new Instantiator();
         $envelope = $instantiator->instantiate($input['message_fqcn']);
+
+        $headers = array_filter($args, function ($item) use ($input) {
+            return $item instanceof $input['headers_fqcn'];
+        });
+        if ($headers) {
+            $envelope->setHeader(reset($headers));
+        } else {
+
+            $headers = array_filter($args, function ($item) {
+                return $item instanceof Header;
+            });
+            if (count($headers)) {
+                $headerPlaceholder = new HeaderPlaceholder();
+                foreach ($headers as $headerInfo) {
+                    $this->headerHandler->addHeaderData($headerPlaceholder, $headerInfo);
+                }
+                $envelope->setHeader($headerPlaceholder);
+            }
+        }
+
+        $args = array_filter($args, function ($item) use ($input) {
+            return !($item instanceof Header) && !($item instanceof $input['headers_fqcn']);
+        });
 
         if (!count($input['parts'])) {
             return $envelope;

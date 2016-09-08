@@ -2,8 +2,11 @@
 
 namespace GoetasWebservices\SoapServices\Tests;
 
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
 use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
@@ -13,6 +16,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
+use JMS\Serializer\Handler\HandlerRegistryInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
@@ -39,7 +43,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             'http://www.example.org/test/' => "Ex"
         ];
 
-        self::$generator = new Generator($namespaces);
+        self::$generator = new Generator($namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
         self::$generator->generate([__DIR__ . '/../Fixtures/Soap/test.wsdl']);
         self::$generator->registerAutoloader();
     }
@@ -57,7 +61,10 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         ];
         $generator = new Generator($namespaces);
         $ref = new \ReflectionClass(Fault::class);
-        $serializer = $generator->buildSerializer(null, [
+        $headerHandler =  new HeaderHandler();
+        $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
+            $h->registerSubscribingHandler($headerHandler);
+        }, [
             'GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope' => dirname($ref->getFileName()) . '/../../Resources/metadata/jms'
         ]);
 
@@ -71,6 +78,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $this->factory = new ClientFactory($namespaces, $serializer);
         $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
+        $this->factory->setHeaderHandler($headerHandler);
 
         $metadataGenerator = new PhpMetadataGenerator($namespaces);
         $this->factory->setMetadataGenerator($metadataGenerator);
@@ -102,6 +110,58 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $response = $client->getSimple("foo");
         $this->assertInstanceOf('Ex\GetSimpleResponse', $response);
         $this->assertEquals("A", $response->getOut());
+    }
+
+    public function testHeaders()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+            <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <out><![CDATA[A]]></out>
+            </ns-b3c6b39d:getSimpleResponse>
+          </SOAP:Body>
+        </SOAP:Envelope>');
+
+        $this->responseMock->append($httpResponse);
+        $this->responseMock->append($httpResponse);
+
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+
+        $mp = new \Ex\GetReturnMultiParam();
+        $mp->setIn("foo");
+
+        $client->getSimple("foo", new Header($mp));
+        $client->getSimple("foo", new MustUnderstandHeader($mp));
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
+              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getReturnMultiParam>
+              </SOAP:Header>
+            </SOAP:Envelope>',
+            (string)$this->requestResponseStack[0]['request']->getBody());
+
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
+              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/" SOAP:mustUnderstand="true">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getReturnMultiParam>
+              </SOAP:Header>
+            </SOAP:Envelope>',
+            (string)$this->requestResponseStack[1]['request']->getBody());
     }
 
     public function testNoOutput()

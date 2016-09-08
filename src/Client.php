@@ -3,6 +3,7 @@ namespace GoetasWebservices\SoapServices\SoapClient;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReader;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReaderInterface;
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ServerException;
@@ -48,14 +49,14 @@ class Client
     private $argumentsReader;
 
 
-    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, $unwrap = false)
+    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, HeaderHandler $headerHandler, $unwrap = false)
     {
         $this->serviceDefinition = $serviceDefinition;
         $this->serializer = $serializer;
 
         $this->client = $client;
         $this->messageFactory = $messageFactory;
-        $this->argumentsReader = new ArgumentsReader($this->serializer);
+        $this->argumentsReader = new ArgumentsReader($this->serializer, $headerHandler);
         $this->resultCreator = new ResultCreator($this->serializer, $unwrap);
     }
 

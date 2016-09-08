@@ -1,6 +1,7 @@
 <?php
 namespace GoetasWebservices\SoapServices\SoapClient;
 
+use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGeneratorInterface;
 use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
@@ -36,6 +37,11 @@ class ClientFactory
 
     private $unwrap = false;
 
+    /**
+     * @var HeaderHandler
+     */
+    private $headerHandler;
+
     public function __construct(array $namespaces, SerializerInterface $serializer)
     {
         $this->setSerializer($serializer);
@@ -43,6 +49,11 @@ class ClientFactory
         foreach ($namespaces as $namespace => $phpNamespace) {
             $this->addNamespace($namespace, $phpNamespace);
         }
+    }
+
+    public function setHeaderHandler(HeaderHandler $headerHandler)
+    {
+        $this->headerHandler = $headerHandler;
     }
 
     public function setUnwrapResponses($unwrap)
@@ -105,9 +116,10 @@ class ClientFactory
 
         $this->httpClient = $this->httpClient ?: HttpClientDiscovery::find();
         $this->messageFactory = $this->messageFactory ?: MessageFactoryDiscovery::find();
+        $headerHandler = $this->headerHandler ?: new HeaderHandler();
         $unwrap = is_null($unwrap) ? $this->unwrap : $unwrap;
 
-        return new Client($service, $this->serializer, $this->messageFactory, $this->httpClient, $unwrap);
+        return new Client($service, $this->serializer, $this->messageFactory, $this->httpClient, $headerHandler, $unwrap);
     }
 
     /**
