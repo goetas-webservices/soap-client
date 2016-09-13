@@ -3,13 +3,17 @@
 namespace GoetasWebservices\SoapServices\Tests;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
+use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
+use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
+use GoetasWebservices\SoapServices\SoapCommon\Metadata\DevMetadataReader;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
+use GoetasWebservices\WsdlToPhp\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
+use GoetasWebservices\XML\SOAPReader\SoapReader;
+use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
+use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -18,9 +22,13 @@ use GuzzleHttp\Psr7\Response;
 use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 {
+    protected static $namespaces = [
+        'http://www.example.org/test/' => "Ex"
+    ];
     /**
      * @var Generator
      */
@@ -39,12 +47,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public static function setUpBeforeClass()
     {
-        $namespaces = [
-            'http://www.example.org/test/' => "Ex"
-        ];
-
-        self::$generator = new Generator($namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
-        self::$generator->generate([__DIR__ . '/../Fixtures/Soap/test.wsdl']);
+        self::$generator = new Generator(self::$namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
+        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl']);
         self::$generator->registerAutoloader();
     }
 
@@ -56,10 +60,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $namespaces = [
-            'http://www.example.org/test/' => "Ex"
-        ];
-        $generator = new Generator($namespaces);
+
+        $generator = new Generator(self::$namespaces);
         $ref = new \ReflectionClass(Fault::class);
         $headerHandler =  new HeaderHandler();
         $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
@@ -76,12 +78,21 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $guzzle = new Client(['handler' => $handler]);
 
-        $this->factory = new ClientFactory($namespaces, $serializer);
+
+        $naming = new ShortNamingStrategy();
+        $dispatcher = new EventDispatcher();
+        $wsdlReader = new DefinitionsReader(null, $dispatcher);
+        $soapReader = new SoapReader();
+        $dispatcher->addSubscriber($soapReader);
+
+        $metadataGenerator = new PhpMetadataGenerator($naming, self::$namespaces);
+        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
+
+
+        $this->factory = new ClientFactory($metadataReader, $serializer);
         $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
         $this->factory->setHeaderHandler($headerHandler);
 
-        $metadataGenerator = new PhpMetadataGenerator($namespaces);
-        $this->factory->setMetadataGenerator($metadataGenerator);
     }
 
     public function testGetSimple()
@@ -96,20 +107,44 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         </SOAP:Envelope>');
 
         $this->responseMock->append($httpResponse);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
 
-        $response = $client->getSimple("foo");
-        $this->assertEquals("A", $response);
-
-        $this->responseMock->append($httpResponse);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, false);
-
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
         /**
          * @var $response \Ex\GetSimpleResponse
          */
         $response = $client->getSimple("foo");
         $this->assertInstanceOf('Ex\GetSimpleResponse', $response);
         $this->assertEquals("A", $response->getOut());
+    }
+
+    public function testGetSimpleUnwrapped()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+            <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <out><![CDATA[A]]></out>
+            </ns-b3c6b39d:getSimpleResponse>
+          </SOAP:Body>
+        </SOAP:Envelope>');
+        $this->responseMock->append($httpResponse);
+
+        $naming = new ShortNamingStrategy();
+        $dispatcher = new EventDispatcher();
+        $wsdlReader = new DefinitionsReader(null, $dispatcher);
+        $soapReader = new SoapReader();
+        $dispatcher->addSubscriber($soapReader);
+
+        $metadataGenerator = new PhpMetadataGenerator($naming, self::$namespaces, true);
+        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
+
+        $this->factory->setMetadataReader($metadataReader);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        /**
+         * @var $response \Ex\GetSimpleResponse
+         */
+        $response = $client->getSimple("foo");
+        $this->assertSame("A", $response);
     }
 
     public function testHeaders()
@@ -126,7 +161,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append($httpResponse);
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $mp = new \Ex\GetReturnMultiParam();
         $mp->setIn("foo");
@@ -172,7 +207,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
               <SOAP:Body />
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $response = $client->noOutput("foo");
         $this->assertNull($response);
@@ -190,7 +225,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
               </SOAP:Body>
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $client->noInput("foo");
         $this->assertXmlStringEqualsXmlString(
@@ -208,7 +243,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
                 '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $response = $client->noBoth("foo");
         $this->assertNull($response);
@@ -234,7 +269,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $mp = new \Ex\GetReturnMultiParam();
         $mp->setIn("foo");
@@ -270,7 +305,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
         $mp = new \Ex\GetMultiParam();
         $mp->setIn("foo");
@@ -307,7 +342,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public function testGetSimpleError(ResponseInterface $response)
     {
         $this->responseMock->append($response);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
         $client->getSimple("foo");
     }
 
@@ -324,7 +359,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
                </SOAP-ENV:Body>
             </SOAP-ENV:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
 
         try {
             $client->getSimple("foo");

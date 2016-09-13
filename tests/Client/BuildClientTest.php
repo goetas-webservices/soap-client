@@ -3,8 +3,13 @@
 namespace GoetasWebservices\SoapServices\Tests;
 
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
+use GoetasWebservices\SoapServices\SoapCommon\Metadata\DevMetadataReader;
+use GoetasWebservices\WsdlToPhp\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
+use GoetasWebservices\XML\SOAPReader\SoapReader;
+use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
+use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class BuildClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -21,20 +26,26 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
         $generator = new Generator($namespaces);
         $serializer = $generator->buildSerializer();
 
-        $this->factory = new ClientFactory($namespaces, $serializer);
+        $naming = new ShortNamingStrategy();
+        $metadataGenerator = new PhpMetadataGenerator($naming, $namespaces);
 
-        $metadataGenerator = new PhpMetadataGenerator($namespaces);
-        $this->factory->setMetadataGenerator($metadataGenerator);
+        $dispatcher = new EventDispatcher();
+        $wsdlReader = new DefinitionsReader(null, $dispatcher);
+        $soapReader = new SoapReader();
+        $dispatcher->addSubscriber($soapReader);
+
+        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
+        $this->factory = new ClientFactory($metadataReader, $serializer);
     }
 
     public function testBuildServer()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl');
+        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
     }
 
     public function testGetService()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', 'testSOAP');
+        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP');
     }
 
     /**
@@ -43,7 +54,7 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetWrongPort()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', 'XXX');
+        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'XXX');
     }
 
     /**
@@ -52,7 +63,7 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetWrongService()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/Soap/test.wsdl', 'testSOAP', 'alternativeTest');
+        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP', 'alternativeTest');
     }
 
 }

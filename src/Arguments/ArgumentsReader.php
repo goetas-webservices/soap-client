@@ -81,16 +81,14 @@ class ArgumentsReader implements ArgumentsReaderInterface
                 throw new \Exception("Expected to have exactly " . count($input['parts']) . " arguments, supplied " . count($args));
             }
 
-            foreach ($input['parts'] as $paramName) {
-                //@todo $propertyName should use the xsd2php naming strategy (or do in the metadata extractor)
-                $propertyName = Inflector::camelize(str_replace(".", " ", $paramName));
-                $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
+            foreach ($input['parts'] as $paramName => $elementName) {
+                $propertyMetadata = $classMetadata->propertyMetadata[$paramName];
                 $propertyMetadata->setValue($body, array_shift($args));
             }
             return $envelope;
         }
 
-        $propertyName = Inflector::camelize(str_replace(".", " ", reset($input['parts'])));
+        $propertyName = key($input['parts']);
         $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
         if ($args[0] instanceof $propertyMetadata->type['name']) {
             $propertyMetadata->setValue($body, reset($args));

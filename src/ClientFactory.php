@@ -2,8 +2,7 @@
 namespace GoetasWebservices\SoapServices\SoapClient;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGenerator;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\PhpMetadataGeneratorInterface;
+use GoetasWebservices\SoapServices\SoapCommon\Metadata\MetadataReaderInterface;
 use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
 use GoetasWebservices\XML\WSDLReader\Exception\ServiceNotFoundException;
 use Http\Client\HttpClient;
@@ -14,8 +13,6 @@ use JMS\Serializer\SerializerInterface;
 
 class ClientFactory
 {
-    protected $namespaces = [];
-    protected $metadata = [];
     /**
      * @var SerializerInterface
      */
@@ -31,34 +28,24 @@ class ClientFactory
     protected $httpClient;
 
     /**
-     * @var PhpMetadataGeneratorInterface
+     * @var MetadataReaderInterface
      */
-    private $generator;
-
-    private $unwrap = false;
+    private $reader;
 
     /**
      * @var HeaderHandler
      */
     private $headerHandler;
 
-    public function __construct(array $namespaces, SerializerInterface $serializer)
+    public function __construct(MetadataReaderInterface $reader, SerializerInterface $serializer)
     {
+        $this->setMetadataReader($reader);
         $this->setSerializer($serializer);
-
-        foreach ($namespaces as $namespace => $phpNamespace) {
-            $this->addNamespace($namespace, $phpNamespace);
-        }
     }
 
     public function setHeaderHandler(HeaderHandler $headerHandler)
     {
         $this->headerHandler = $headerHandler;
-    }
-
-    public function setUnwrapResponses($unwrap)
-    {
-        $this->unwrap = !!$unwrap;
     }
 
     public function setHttpClient(HttpClient $client)
@@ -79,47 +66,33 @@ class ClientFactory
         $this->serializer = $serializer;
     }
 
-    public function setMetadataGenerator(PhpMetadataGeneratorInterface $generator)
+    public function setMetadataReader(MetadataReaderInterface $reader)
     {
-        $this->generator = $generator;
+        $this->reader = $reader;
     }
 
     private function getSoapService($wsdl, $portName = null, $serviceName = null)
     {
-        $generator = $this->generator ?: new PhpMetadataGenerator();
-
-        foreach ($this->namespaces as $ns => $phpNs) {
-            $generator->addNamespace($ns, $phpNs);
-        }
-
-        $services = $generator->generateServices($wsdl);
-        $service = $this->getService($serviceName, $services);
-
+        $servicesMetadata = $this->reader->load($wsdl);
+        $service = $this->getService($serviceName, $servicesMetadata);
         return $this->getPort($portName, $service);
-    }
-
-    public function addNamespace($uri, $phpNs)
-    {
-        $this->namespaces[$uri] = $phpNs;
     }
 
     /**
      * @param string $wsdl
      * @param null|string $portName
      * @param null|string $serviceName
-     * @param null|bool $unwrap
      * @return Client
      */
-    public function getClient($wsdl, $portName = null, $serviceName = null, $unwrap = null)
+    public function getClient($wsdl, $portName = null, $serviceName = null)
     {
         $service = $this->getSoapService($wsdl, $portName, $serviceName);
 
         $this->httpClient = $this->httpClient ?: HttpClientDiscovery::find();
         $this->messageFactory = $this->messageFactory ?: MessageFactoryDiscovery::find();
         $headerHandler = $this->headerHandler ?: new HeaderHandler();
-        $unwrap = is_null($unwrap) ? $this->unwrap : $unwrap;
 
-        return new Client($service, $this->serializer, $this->messageFactory, $this->httpClient, $headerHandler, $unwrap);
+        return new Client($service, $this->serializer, $this->messageFactory, $this->httpClient, $headerHandler);
     }
 
     /**

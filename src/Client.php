@@ -49,7 +49,7 @@ class Client
     private $argumentsReader;
 
 
-    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, HeaderHandler $headerHandler, $unwrap = false)
+    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, HeaderHandler $headerHandler)
     {
         $this->serviceDefinition = $serviceDefinition;
         $this->serializer = $serializer;
@@ -57,7 +57,7 @@ class Client
         $this->client = $client;
         $this->messageFactory = $messageFactory;
         $this->argumentsReader = new ArgumentsReader($this->serializer, $headerHandler);
-        $this->resultCreator = new ResultCreator($this->serializer, $unwrap);
+        $this->resultCreator = new ResultCreator($this->serializer, !empty($serviceDefinition['unwrap']));
     }
 
     public function __call($functionName, array $args)
