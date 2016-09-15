@@ -1,0 +1,169 @@
+<?php
+namespace GoetasWebservices\SoapServices\SoapClient\Builder;
+
+use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\CleanupPass;
+use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\ConfigurePass;
+use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\SoapClientExtension;
+use GoetasWebservices\WsdlToPhp\DependencyInjection\Compiler\ConfigureMetadataPass;
+use GoetasWebservices\WsdlToPhp\DependencyInjection\Wsdl2PhpExtension;
+use GoetasWebservices\Xsd\XsdToPhp\DependencyInjection\Xsd2PhpExtension;
+use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\BaseTypesHandler;
+use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\XmlSchemaDateHandler;
+use JMS\Serializer\Handler\HandlerRegistryInterface;
+use JMS\Serializer\SerializerBuilder;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderResolver;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+
+class SoapContainerBuilder
+{
+    private $className = 'SoapClientContainer';
+    private $classNs = 'SoapServicesStub';
+
+    protected $configFile;
+
+    public function __construct($configFile)
+    {
+        $this->configFile = $configFile;
+    }
+
+    public function setContainerClassName($fqcn)
+    {
+        $pos = strrpos($fqcn, '\\');
+        $this->className = substr($fqcn, $pos + 1);
+        $this->classNs = substr($fqcn, 0, $pos);
+    }
+
+    /**
+     * @param array $metadata
+     * @return ContainerBuilder
+     */
+    protected function getContainerBuilder(array $metadata = array())
+    {
+        $container = new ContainerBuilder();
+
+        $container->registerExtension(new Wsdl2PhpExtension());
+        $container->registerExtension(new Xsd2PhpExtension());
+        $container->registerExtension(new SoapClientExtension());
+
+        $container->addCompilerPass(new ConfigureMetadataPass());
+        $container->addCompilerPass(new ConfigurePass());
+        $container->addCompilerPass(new CleanupPass());
+
+        $locator = new FileLocator('.');
+        $loaders = array(
+            new YamlFileLoader($container, $locator),
+            new XmlFileLoader($container, $locator)
+        );
+        $delegatingLoader = new DelegatingLoader(new LoaderResolver($loaders));
+        $delegatingLoader->load($this->configFile);
+
+        $container->setParameter('goetas.soap_client.metadata', $metadata);
+
+        $container->compile();
+
+        return $container;
+    }
+
+    /**
+     * @param ContainerInterface $debugContainer
+     * @return array
+     */
+    protected function fetchMetadata(ContainerInterface $debugContainer)
+    {
+        $metadataReader = $debugContainer->get('goetas.wsdl2php.metadata_loader.dev');
+        $wsdlMetadata = $debugContainer->getParameter('wsdl2php.config')['metadata'];
+
+        $metadata = [];
+        foreach (array_keys($wsdlMetadata) as $uri) {
+            $metadata[$uri] = $metadataReader->load($uri);
+        }
+
+        return $metadata;
+    }
+
+    public function getDebugContainer()
+    {
+        return $this->getContainerBuilder();
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getProdContainer()
+    {
+        $ref = new \ReflectionClass("{$this->classNs}\\{$this->className}");
+        return $ref->newInstance();
+    }
+
+    /**
+     * @param $dir
+     * @param ContainerInterface $debugContainer
+     */
+    public function dumpContainerForProd($dir, ContainerInterface $debugContainer)
+    {
+        $metadata = $this->fetchMetadata($debugContainer);
+
+        if (!$metadata) {
+            throw new \Exception("Empty metadata can not be used for production");
+        }
+        $forProdContainer = $this->getContainerBuilder($metadata);
+        $this->dump($forProdContainer, $dir);
+    }
+
+    private function dump(ContainerBuilder $container, $dir)
+    {
+        $dumper = new PhpDumper($container);
+        $options = [
+            'debug' => false,
+            'class' => $this->className,
+            'namespace' => $this->classNs
+        ];
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        file_put_contents($dir . '/' . $this->className . '.php', $dumper->dump($options));
+    }
+
+    /**
+     * @param ContainerInterface $container
+     * @param callable $callback
+     * @return SerializerBuilder
+     */
+    public function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null)
+    {
+        $destinations = $container->getParameter('xsd2php.config')['destinations_jms'];
+        return self::createSerializerBuilder($destinations, $callback);
+    }
+
+    /**
+     * @param array $jmsMetadata
+     * @param callable $callback
+     * @return SerializerBuilder
+     */
+    public function createSerializerBuilder(array $jmsMetadata, callable $callback = null)
+    {
+        $serializerBuilder = SerializerBuilder::create();
+        $serializerBuilder->configureHandlers(function (HandlerRegistryInterface $handler) use ($callback, $serializerBuilder) {
+            $serializerBuilder->addDefaultHandlers();
+            $handler->registerSubscribingHandler(new BaseTypesHandler()); // XMLSchema List handling
+            $handler->registerSubscribingHandler(new XmlSchemaDateHandler()); // XMLSchema date handling
+            if ($callback) {
+                call_user_func($callback, $handler);
+            }
+        });
+
+
+        foreach ($jmsMetadata as $php => $dir) {
+            $serializerBuilder->addMetadataDir($dir, $php);
+        }
+        return $serializerBuilder;
+    }
+}
