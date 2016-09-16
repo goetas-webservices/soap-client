@@ -1,0 +1,23 @@
+soap_client:
+  alternative_endpoints:
+    service:
+      port: xxx
+
+xsd2php:
+  namespaces:
+    'http://www.example.org/test/': 'TestNs'
+    'http://www.webserviceX.NET': 'GlobalWeather'
+  destinations_php:
+    'TestNs': soap/src
+    'GlobalWeather': soap/src-gw
+  destinations_jms:
+    'TestNs': soap/metadata
+    'GlobalWeather': soap/metadata-gw
+  aliases:
+    'http://www.example.org/test/':
+      responseHaderResponse:  'HaderResponse'
+
+wsdl2php:
+  metadata:
+    '/home/goetas/projects/soap-client/tests/Fixtures/test.wsdl': ~
+    'http://www.webservicex.com/globalweather.asmx?WSDL': ~

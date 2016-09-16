@@ -1,0 +1,17 @@
+soap_client:
+  unwrap_returns: true
+  alternative_endpoints:
+    service:
+      port: xxx
+
+xsd2php:
+  namespaces:
+    'http://www.webserviceX.NET/': 'GlobalWeather'
+  destinations_php:
+    'GlobalWeather': soap/src-gw
+  destinations_jms:
+    'GlobalWeather': soap/metadata-gw
+
+wsdl2php:
+  metadata:
+    'http://www.webservicex.net/mortgage.asmx?WSDL': ~
