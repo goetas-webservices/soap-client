@@ -1,0 +1,19 @@
+soap_client:
+  alternative_endpoints:
+    service:
+      port: xxx
+
+xsd2php:
+  namespaces:
+    'http://www.example.org/test/': 'TestNs'
+  destinations_php:
+    'TestNs': soap/src
+  destinations_jms:
+    'TestNs': soap/metadata
+  aliases:
+    'http://www.example.org/test/':
+      responseHaderResponse:  'HaderResponse'
+
+wsdl2php:
+  metadata:
+    '/home/goetas/projects/soap-client/tests/Fixtures/test.wsdl': ~

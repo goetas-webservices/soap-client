@@ -25,6 +25,7 @@ before_script:
 
 script:
   - vendor/phpunit/phpunit/phpunit $PHPUNIT_FLAGS
+  - bin/soap-client generate tests/Fixtures/config.yml soap/src-gw/Container -vvv --dest-class=GlobalWeather/Container/SoapClientContainer
 
 after_success:
   - wget https://scrutinizer-ci.com/ocular.phar
