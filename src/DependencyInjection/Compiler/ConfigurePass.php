@@ -10,6 +10,7 @@ class ConfigurePass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $soapConfig = $container->getParameter('goetas.soap_client.config');
+        $xsd2phpConfig = $container->getParameter('xsd2php.config');
         $wsdlConfig = $container->getParameter('wsdl2php.config');
         $metadataGenerator = $container->getDefinition('goetas.wsdl2php.metadata.generator');
         foreach ($soapConfig['alternative_endpoints'] as $service => $data) {
@@ -22,6 +23,7 @@ class ConfigurePass implements CompilerPassInterface
         $keys = ['headers', 'parts', 'messages'];
         $writer->addMethodCall('setBaseNs', [array_intersect_key($wsdlConfig, array_combine($keys, $keys))]);
         $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
+        $writer->replaceArgument(1, $xsd2phpConfig['namespaces']);
 
         $writer = $container->getDefinition('goetas.wsdl2php.stub.client_generator');
         $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);

@@ -4,7 +4,6 @@ namespace GoetasWebservices\SoapServices\SoapClient\Builder;
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\CleanupPass;
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\ConfigurePass;
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\SoapClientExtension;
-use GoetasWebservices\WsdlToPhp\DependencyInjection\Compiler\ConfigureMetadataPass;
 use GoetasWebservices\WsdlToPhp\DependencyInjection\Wsdl2PhpExtension;
 use GoetasWebservices\Xsd\XsdToPhp\DependencyInjection\Xsd2PhpExtension;
 use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\BaseTypesHandler;
@@ -51,8 +50,6 @@ class SoapContainerBuilder
         $container->registerExtension(new Wsdl2PhpExtension());
         $container->registerExtension(new Xsd2PhpExtension());
         $container->registerExtension(new SoapClientExtension());
-
-        $container->addCompilerPass(new ConfigureMetadataPass());
         $container->addCompilerPass(new ConfigurePass());
         $container->addCompilerPass(new CleanupPass());
 
