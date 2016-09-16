@@ -3,8 +3,8 @@
 namespace GoetasWebservices\SoapServices\Tests;
 
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\DevMetadataReader;
-use GoetasWebservices\WsdlToPhp\Metadata\PhpMetadataGenerator;
+use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
+use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -27,15 +27,15 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
         $serializer = $generator->buildSerializer();
 
         $naming = new ShortNamingStrategy();
-        $metadataGenerator = new PhpMetadataGenerator($naming, $namespaces);
+        $metadataGenerator = new MetadataGenerator($naming, $namespaces);
 
         $dispatcher = new EventDispatcher();
         $wsdlReader = new DefinitionsReader(null, $dispatcher);
         $soapReader = new SoapReader();
         $dispatcher->addSubscriber($soapReader);
 
-        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
-        $this->factory = new ClientFactory($metadataReader, $serializer);
+        $metadataLoader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
+        $this->factory = new ClientFactory($metadataLoader, $serializer);
     }
 
     public function testBuildServer()

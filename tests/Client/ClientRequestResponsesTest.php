@@ -7,9 +7,9 @@ use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\DevMetadataReader;
+use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
+use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
-use GoetasWebservices\WsdlToPhp\Metadata\PhpMetadataGenerator;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -85,11 +85,11 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $soapReader = new SoapReader();
         $dispatcher->addSubscriber($soapReader);
 
-        $metadataGenerator = new PhpMetadataGenerator($naming, self::$namespaces);
-        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
+        $metadataGenerator = new MetadataGenerator($naming, self::$namespaces);
+        $metadataLoader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
 
 
-        $this->factory = new ClientFactory($metadataReader, $serializer);
+        $this->factory = new ClientFactory($metadataLoader, $serializer);
         $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
         $this->factory->setHeaderHandler($headerHandler);
 
@@ -135,8 +135,9 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $soapReader = new SoapReader();
         $dispatcher->addSubscriber($soapReader);
 
-        $metadataGenerator = new PhpMetadataGenerator($naming, self::$namespaces, true);
-        $metadataReader = new DevMetadataReader($metadataGenerator, $soapReader, $wsdlReader);
+        $metadataGenerator = new MetadataGenerator($naming, self::$namespaces);
+        $metadataGenerator->setUnwrap(true);
+        $metadataReader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
 
         $this->factory->setMetadataReader($metadataReader);
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');

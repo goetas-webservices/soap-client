@@ -67,8 +67,6 @@ class Client
 
         $xmlMessage = $this->serializer->serialize($message, 'xml');
         $headers = $this->buildHeaders($soapOperation);
-
-        echo $xmlMessage."\n\n";
         $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
 
         try {
