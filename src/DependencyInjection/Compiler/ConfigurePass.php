@@ -21,7 +21,10 @@ class ConfigurePass implements CompilerPassInterface
         $writer = $container->getDefinition('goetas.wsdl2php.metadata.generator');
         $keys = ['headers', 'parts', 'messages'];
         $writer->addMethodCall('setBaseNs', [array_intersect_key($wsdlConfig, array_combine($keys, $keys))]);
-        $writer->addMethodCall('setUnwrap', [$wsdlConfig['unwrap_returns']]);
+        $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
+
+        $writer = $container->getDefinition('goetas.wsdl2php.stub.client_generator');
+        $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
 
 
         $forProduction = !!$container->getParameter('goetas.soap_client.metadata');

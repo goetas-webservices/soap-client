@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Zend\Code\Generator\FileGenerator;
 
 class Generate extends Command
 {
@@ -40,11 +41,13 @@ class Generate extends Command
         $wsdlMetadata = $debugContainer->getParameter('wsdl2php.config')['metadata'];
 
         $schemas = [];
+        $portTypes = [];
         $wsdlReader = $debugContainer->get('goetas.wsdl2php.wsdl_reader');
 
         foreach (array_keys($wsdlMetadata) as $src) {
             $definitions = $wsdlReader->readFile($src);
             $schemas[] = $definitions->getSchema();
+            $portTypes = array_merge($portTypes, $definitions->getPortTypes());
         }
 
         $soapReader = $debugContainer->get('goetas.wsdl2php.soap_reader');
@@ -59,6 +62,15 @@ class Generate extends Command
             $writer = $debugContainer->get('goetas.xsd2php.writer.' . $type);
             $writer->write($items);
         }
+
+        /**
+         * @var $clientStubGenerator \GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator
+         */
+        $clientStubGenerator = $debugContainer->get('goetas.wsdl2php.stub.client_generator');
+
+        $classDefinitions = $clientStubGenerator->generate($portTypes);
+        $classWriter = $debugContainer->get('goetas.xsd2php.class_writer.php');
+        $classWriter->write($classDefinitions);
 
         $containerDumped = $containerBuilder->dumpContainerForProd($input->getArgument('dest-dir'), $debugContainer);
 

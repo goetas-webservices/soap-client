@@ -63,12 +63,12 @@ class Client
     public function __call($functionName, array $args)
     {
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
-
         $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
         $xmlMessage = $this->serializer->serialize($message, 'xml');
         $headers = $this->buildHeaders($soapOperation);
 
+        echo $xmlMessage."\n\n";
         $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
 
         try {
@@ -128,7 +128,7 @@ class Client
 
         foreach ($serviceDefinition['operations'] as $opName => $operation) {
             if (strtolower($functionName) == strtolower($opName)) {
-                return $opName;
+                return $operation;
             }
         }
         throw new ClientException("Can not find an operation to run $functionName service call");

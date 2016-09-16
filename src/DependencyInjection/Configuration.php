@@ -18,6 +18,9 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->scalarNode('unwrap_returns')
+                    ->defaultValue(false)
+                ->end()
             ->end()
         ;
         return $treeBuilder;

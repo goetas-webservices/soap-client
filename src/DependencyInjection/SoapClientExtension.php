@@ -10,14 +10,15 @@ class SoapClientExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
-        $xml = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $xml->load('services.xml');
-
         $config = $this->processConfiguration(new Configuration(), $configs);
         foreach ($configs as $subConfig) {
             $config = array_merge($config, $subConfig);
         }
         $container->setParameter('goetas.soap_client.config', $config);
+        $container->setParameter('goetas.soap_client.unwrap_returns', $config['unwrap_returns']);
+
+        $xml = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $xml->load('services.xml');
     }
 
     protected static function sanitizePhp($ns)

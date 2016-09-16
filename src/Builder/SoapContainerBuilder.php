@@ -34,6 +34,7 @@ class SoapContainerBuilder
 
     public function setContainerClassName($fqcn)
     {
+        $fqcn = strtr($fqcn, ['.' => '\\', '/' => '\\',]);
         $pos = strrpos($fqcn, '\\');
         $this->className = substr($fqcn, $pos + 1);
         $this->classNs = substr($fqcn, 0, $pos);
@@ -137,7 +138,7 @@ class SoapContainerBuilder
      * @param callable $callback
      * @return SerializerBuilder
      */
-    public function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null)
+    public static function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null)
     {
         $destinations = $container->getParameter('xsd2php.config')['destinations_jms'];
         return self::createSerializerBuilder($destinations, $callback);
@@ -148,7 +149,7 @@ class SoapContainerBuilder
      * @param callable $callback
      * @return SerializerBuilder
      */
-    public function createSerializerBuilder(array $jmsMetadata, callable $callback = null)
+    public static function  createSerializerBuilder(array $jmsMetadata, callable $callback = null)
     {
         $serializerBuilder = SerializerBuilder::create();
         $serializerBuilder->configureHandlers(function (HandlerRegistryInterface $handler) use ($callback, $serializerBuilder) {

@@ -2,7 +2,7 @@
 namespace GoetasWebservices\SoapServices\SoapClient;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapCommon\Metadata\MetadataReaderInterface;
+use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\MetadataLoaderInterface;
 use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
 use GoetasWebservices\XML\WSDLReader\Exception\ServiceNotFoundException;
 use Http\Client\HttpClient;
@@ -28,7 +28,7 @@ class ClientFactory
     protected $httpClient;
 
     /**
-     * @var MetadataReaderInterface
+     * @var MetadataLoaderInterface
      */
     private $reader;
 
@@ -37,7 +37,7 @@ class ClientFactory
      */
     private $headerHandler;
 
-    public function __construct(MetadataReaderInterface $reader, SerializerInterface $serializer)
+    public function __construct(MetadataLoaderInterface $reader, SerializerInterface $serializer)
     {
         $this->setMetadataReader($reader);
         $this->setSerializer($serializer);
@@ -66,7 +66,7 @@ class ClientFactory
         $this->serializer = $serializer;
     }
 
-    public function setMetadataReader(MetadataReaderInterface $reader)
+    public function setMetadataReader(MetadataLoaderInterface $reader)
     {
         $this->reader = $reader;
     }
