@@ -6,8 +6,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Zend\Code\Generator\FileGenerator;
 
 class Generate extends Command
 {
@@ -38,11 +38,12 @@ class Generate extends Command
 
         $debugContainer = $containerBuilder->getDebugContainer();
 
-        $wsdlMetadata = $debugContainer->getParameter('wsdl2php.config')['metadata'];
+
+        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.wsdl2php.config')['metadata'];
 
         $schemas = [];
         $portTypes = [];
-        $wsdlReader = $debugContainer->get('goetas.wsdl2php.wsdl_reader');
+        $wsdlReader = $debugContainer->get('goetas_webservices.wsdl2php.wsdl_reader');
 
         foreach (array_keys($wsdlMetadata) as $src) {
             $definitions = $wsdlReader->readFile($src);
@@ -50,31 +51,28 @@ class Generate extends Command
             $portTypes = array_merge($portTypes, $definitions->getPortTypes());
         }
 
-        $soapReader = $debugContainer->get('goetas.wsdl2php.soap_reader');
+        $soapReader = $debugContainer->get('goetas_webservices.wsdl2php.soap_reader');
 
 
         foreach (['php', 'jms'] as $type) {
-            $converter = $debugContainer->get('goetas.xsd2php.converter.' . $type);
-            $wsdlConverter = $debugContainer->get('goetas.wsdl2php.converter.' . $type);
+            $converter = $debugContainer->get('goetas_webservices.xsd2php.converter.' . $type);
+            $wsdlConverter = $debugContainer->get('goetas_webservices.wsdl2php.converter.' . $type);
             $items = $wsdlConverter->visitServices($soapReader->getServices());
             $items = array_merge($items, $converter->convert($schemas));
 
-            $writer = $debugContainer->get('goetas.xsd2php.writer.' . $type);
+            $writer = $debugContainer->get('goetas_webservices.xsd2php.writer.' . $type);
             $writer->write($items);
         }
+
+        $containerBuilder->dumpContainerForProd($input->getArgument('dest-dir'), $debugContainer);
 
         /**
          * @var $clientStubGenerator \GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator
          */
-        $clientStubGenerator = $debugContainer->get('goetas.wsdl2php.stub.client_generator');
+        $clientStubGenerator = $debugContainer->get('goetas_webservices.soap_client.stub.client_generator');
 
         $classDefinitions = $clientStubGenerator->generate($portTypes);
-        $classWriter = $debugContainer->get('goetas.xsd2php.class_writer.php');
+        $classWriter = $debugContainer->get('goetas_webservices.xsd2php.class_writer.php');
         $classWriter->write($classDefinitions);
-
-        $containerDumped = $containerBuilder->dumpContainerForProd($input->getArgument('dest-dir'), $debugContainer);
-
-        return $containerDumped ? 0 : 255;
-
     }
 }

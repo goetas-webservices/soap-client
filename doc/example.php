@@ -11,7 +11,7 @@ require __DIR__ . '/vendor/autoload.php';
 $container = new SoapClientContainer();
 
 $serializer = SoapContainerBuilder::createSerializerBuilderFromContainer($container)->build();
-$metadata = $container->get('goetas.soap_client.metadata_reader');
+$metadata = $container->get('goetas_webservices.soap_client.metadata_reader');
 
 $factory = new ClientFactory($metadata, $serializer);
 

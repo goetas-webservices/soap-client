@@ -16,4 +16,4 @@ xsd2php:
 
 wsdl2php:
   metadata:
-    '/home/goetas/projects/soap-client/tests/Fixtures/test.wsdl': ~
+    'tests/Fixtures/test.wsdl': ~

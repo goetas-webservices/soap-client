@@ -6,33 +6,30 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ConfigurePass implements CompilerPassInterface
 {
-
     public function process(ContainerBuilder $container)
     {
-        $soapConfig = $container->getParameter('goetas.soap_client.config');
-        $xsd2phpConfig = $container->getParameter('xsd2php.config');
-        $wsdlConfig = $container->getParameter('wsdl2php.config');
-        $metadataGenerator = $container->getDefinition('goetas.wsdl2php.metadata.generator');
+        $soapConfig = $container->getParameter('goetas_webservices.soap_client.config');
+        $xsd2phpConfig = $container->getParameter('goetas_webservices.xsd2php.config');
+        $wsdlConfig = $container->getParameter('goetas_webservices.wsdl2php.config');
+
+        $metadataGenerator = $container->getDefinition('goetas_webservices.soap_common.metadata.generator');
         foreach ($soapConfig['alternative_endpoints'] as $service => $data) {
             foreach ($data as $port => $endPoint) {
                 $metadataGenerator->addMethodCall('addAlternativeEndpoint', [$service, $port, $endPoint]);
             }
         }
-
-        $writer = $container->getDefinition('goetas.wsdl2php.metadata.generator');
         $keys = ['headers', 'parts', 'messages'];
-        $writer->addMethodCall('setBaseNs', [array_intersect_key($wsdlConfig, array_combine($keys, $keys))]);
+        $metadataGenerator->addMethodCall('setBaseNs', [array_intersect_key($wsdlConfig, array_combine($keys, $keys))]);
+        $metadataGenerator->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
+        $metadataGenerator->replaceArgument(1, $xsd2phpConfig['namespaces']);
+
+        $writer = $container->getDefinition('goetas_webservices.soap_client.stub.client_generator');
         $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
-        $writer->replaceArgument(1, $xsd2phpConfig['namespaces']);
-
-        $writer = $container->getDefinition('goetas.wsdl2php.stub.client_generator');
-        $writer->addMethodCall('setUnwrap', [$soapConfig['unwrap_returns']]);
 
 
-        $forProduction = !!$container->getParameter('goetas.soap_client.metadata');
+        $forProduction = !!$container->getParameter('goetas_webservices.soap_common.metadata');
 
-        $readerName = 'goetas.wsdl2php.metadata_loader.' . ($forProduction ? 'array' : 'dev');
-        $reader = clone $container->getDefinition($readerName);
-        $container->setDefinition('goetas.soap_client.metadata_reader', $reader);
+        $readerName = 'goetas_webservices.soap_common.metadata_loader.' . ($forProduction ? 'array' : 'dev');
+        $container->setAlias('goetas_webservices.soap_client.metadata_reader', $readerName);
     }
 }

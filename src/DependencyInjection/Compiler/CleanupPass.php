@@ -8,11 +8,12 @@ class CleanupPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->getParameter('goetas.soap_client.metadata')) {
+        // if there are no metadata, then we are in debug mode, no need to clean up the container
+        if (!$container->getParameter('goetas_webservices.soap_common.metadata')) {
             return;
         }
         foreach ($container->getDefinitions() as $id => $definition) {
-            if (strpos($id, 'goetas.soap_client.metadata_reader') === false && !$definition->isSynthetic()) {
+            if (strpos($id, 'goetas_webservices.soap_common.metadata_loader.array') === false && !$definition->isSynthetic() && $definition->isPublic()) {
                 $definition->setPublic(false);
             }
         }
