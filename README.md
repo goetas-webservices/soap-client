@@ -22,7 +22,7 @@ Add this packages to your `composer.json` file.
         "goetas-webservices/soap-client": "^0.1",
     },
     "require-dev": {
-        "goetas-webservices/wsdl2php": "^0.1",
+        "goetas-webservices/wsdl2php": "^0.2",
     },
 }
 ```
