@@ -83,7 +83,21 @@ class Client
             if (!count($soapOperation['output']['parts'])) {
                 return null;
             }
-            $response = $this->serializer->deserialize((string)$response->getBody(), $soapOperation['output']['message_fqcn'], 'xml');
+
+            $body = (string)$response->getBody();
+            if (strpos($body, ':Fault>')!==false) {
+                $fault = $this->serializer->deserialize($body, Fault::class, 'xml');
+                throw new FaultException(
+                    $fault,
+                    $response,
+                    $request,
+                    "SOAP Fault",
+                    null,
+                    new \Exception()
+                );
+            }
+
+            $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
         } catch (HttpException $e) {
 
             if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'text/xml') === 0) {
