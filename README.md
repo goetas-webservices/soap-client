@@ -5,7 +5,16 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
 
 
-Pure PHP implementation of SOAP 1.1 client.
+PHP implementation of SOAP 1.1 client specifications.
+
+Strengths: 
+
+- Pure PHP, no dependencies on `ext-soap`
+- Extensible (JMS event listeners support)
+- PSR-7 HTTP messaging compatible 
+- Multi HTTP client (guzzle, buzz, curl, react)
+- No WSDL/XSD parsing on production
+- IDE type hinting support
 
 Only document/literal style is supported and the webservice should follow
 the [WS-I](https://en.wikipedia.org/wiki/WS-I_Basic_Profile) guidelines.
