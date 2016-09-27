@@ -5,7 +5,13 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
 
 
-Pure PHP implementation of SOAP 1.1 client
+Pure PHP implementation of SOAP 1.1 client.
+
+Only document/literal style is supported and the webservice should follow
+the [WS-I](https://en.wikipedia.org/wiki/WS-I_Basic_Profile) guidelines.
+
+There are no plans to support the deprecated rpc and encoded styles.
+Webservices not following the WS-I specifications might work, but they are officially not supported.
 
 ## Demo 
 
@@ -30,6 +36,10 @@ Add this packages to your `composer.json` file.
     },
 }
 ```
+
+More dependencies might be needed depending on your PSR-7 and HTTP client preferred implementation.
+You can have a look to the [Dependencies](https://github.com/goetas-webservices/soap-client-demo#dependencies) section 
+of a demo project to understand what can be necessary.
 
 # How to
 
