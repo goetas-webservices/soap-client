@@ -1,5 +1,4 @@
-goetas-webservices / soap-client
-================================
+# goetas-webservices / soap-client
 
 [![Build Status](https://travis-ci.org/goetas-webservices/soap-client.svg?branch=master)](https://travis-ci.org/goetas-webservices/soap-client)
 [![Code Coverage](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
@@ -7,6 +6,11 @@ goetas-webservices / soap-client
 
 
 Pure PHP implementation of SOAP 1.1 client
+
+## Demo 
+
+[goetas-webservices/soap-client-demo](https://github.com/goetas-webservices/soap-client-demo) is a demo project
+that shows how to consume a SOAP api in a generic PHP web application.
 
 
 Installation
@@ -28,7 +32,6 @@ Add this packages to your `composer.json` file.
 ```
 
 # How to
-
 
 To improve performance, this library is based on the concept that all the SOAP/WSDL 
 metadata has to be compiled into PHP compatible metadata (in reality is a bib plain PHP array,
