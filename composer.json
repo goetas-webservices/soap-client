@@ -25,6 +25,7 @@
     "phpunit/phpunit": "^4.8|^5.0",
 
     "goetas-webservices/wsdl2php": "^0.2@dev",
+    "goetas-webservices/wsdl-reader": "^v0.3.1",
 
     "php-http/guzzle6-adapter": "^1.0",
     "php-http/message": "^1.0"

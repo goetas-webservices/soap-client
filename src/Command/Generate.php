@@ -48,7 +48,7 @@ class Generate extends Command
         foreach (array_keys($wsdlMetadata) as $src) {
             $definitions = $wsdlReader->readFile($src);
             $schemas[] = $definitions->getSchema();
-            $portTypes = array_merge($portTypes, $definitions->getPortTypes());
+            $portTypes = array_merge($portTypes, $definitions->getAllPortTypes());
         }
 
         $soapReader = $debugContainer->get('goetas_webservices.wsdl2php.soap_reader');
