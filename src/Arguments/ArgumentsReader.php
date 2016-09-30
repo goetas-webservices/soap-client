@@ -1,7 +1,6 @@
 <?php
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments;
 
-use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Instantiator\Instantiator;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderPlaceholder;
@@ -43,28 +42,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
         $instantiator = new Instantiator();
         $envelope = $instantiator->instantiate($input['message_fqcn']);
 
-        $headers = array_filter($args, function ($item) use ($input) {
-            return $item instanceof $input['headers_fqcn'];
-        });
-        if ($headers) {
-            $envelope->setHeader(reset($headers));
-        } else {
-
-            $headers = array_filter($args, function ($item) {
-                return $item instanceof Header;
-            });
-            if (count($headers)) {
-                $headerPlaceholder = new HeaderPlaceholder();
-                foreach ($headers as $headerInfo) {
-                    $this->headerHandler->addHeaderData($headerPlaceholder, $headerInfo);
-                }
-                $envelope->setHeader($headerPlaceholder);
-            }
-        }
-
-        $args = array_filter($args, function ($item) use ($input) {
-            return !($item instanceof Header) && !($item instanceof $input['headers_fqcn']);
-        });
+        $args = $this->handleHeaders($args, $input, $envelope);
 
         if (!count($input['parts'])) {
             return $envelope;
@@ -103,9 +81,42 @@ class ArgumentsReader implements ArgumentsReaderInterface
             if (!count($args)) {
                 throw new \Exception("Not enough arguments provided. Can't fina a parameter to set " . $propertyMetadata2->name);
             }
-            $value = array_pop($args);
+            $value = array_shift($args);
             $propertyMetadata2->setValue($instance2, $value);
         }
         return $envelope;
+    }
+
+    /**
+     * @param array $args
+     * @param array $input
+     * @param $envelope
+     * @return array
+     */
+    private function handleHeaders(array $args, array $input, $envelope)
+    {
+        $headers = array_filter($args, function ($item) use ($input) {
+            return $item instanceof $input['headers_fqcn'];
+        });
+        if ($headers) {
+            $envelope->setHeader(reset($headers));
+        } else {
+
+            $headers = array_filter($args, function ($item) {
+                return $item instanceof Header;
+            });
+            if (count($headers)) {
+                $headerPlaceholder = new HeaderPlaceholder();
+                foreach ($headers as $headerInfo) {
+                    $this->headerHandler->addHeaderData($headerPlaceholder, $headerInfo);
+                }
+                $envelope->setHeader($headerPlaceholder);
+            }
+        }
+
+        $args = array_filter($args, function ($item) use ($input) {
+            return !($item instanceof Header) && !($item instanceof $input['headers_fqcn']);
+        });
+        return $args;
     }
 }
