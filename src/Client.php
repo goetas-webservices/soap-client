@@ -128,7 +128,7 @@ class Client
     {
         return [
             'Content-Type' => 'text/xml; charset=utf-8',
-            'Soap-Action' => '"' . $operation['action'] . '"',
+            'SoapAction' => '"' . $operation['action'] . '"',
         ];
     }
 
