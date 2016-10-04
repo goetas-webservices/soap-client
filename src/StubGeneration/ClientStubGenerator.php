@@ -193,7 +193,7 @@ class ClientStubGenerator
         $params = [];
         $class =  $this->getClassFromPart($part);
 
-        foreach ($class->getProperties() as $property) {
+        foreach ($class->getPropertiesInHierarchy() as $property) {
             $t = $property->getType()->getPhpType();
             $params[] = $param = new ParamTag($property->getName(), [$t]);
         }
