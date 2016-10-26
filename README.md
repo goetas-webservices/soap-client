@@ -53,7 +53,7 @@ of a demo project to understand what can be necessary.
 # How to
 
 To improve performance, this library is based on the concept that all the SOAP/WSDL 
-metadata has to be compiled into PHP compatible metadata (in reality is a bib plain PHP array,
+metadata has to be compiled into PHP compatible metadata (in reality is a big plain PHP array,
 so is really fast).
 
 To do this we have to define a configuration file (in this case called `config.yml`) that
