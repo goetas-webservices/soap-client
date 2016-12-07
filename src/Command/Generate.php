@@ -52,12 +52,12 @@ class Generate extends Command
         }
 
         $soapReader = $debugContainer->get('goetas_webservices.wsdl2php.soap_reader');
-
+        $soapServices = $soapReader->getServices();
 
         foreach (['php', 'jms'] as $type) {
             $converter = $debugContainer->get('goetas_webservices.xsd2php.converter.' . $type);
             $wsdlConverter = $debugContainer->get('goetas_webservices.wsdl2php.converter.' . $type);
-            $items = $wsdlConverter->visitServices($soapReader->getServices());
+            $items = $wsdlConverter->visitServices($soapServices);
             $items = array_merge($items, $converter->convert($schemas));
 
             $writer = $debugContainer->get('goetas_webservices.xsd2php.writer.' . $type);

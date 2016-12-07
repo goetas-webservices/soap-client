@@ -5,7 +5,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
 
 
-PHP implementation of SOAP 1.1 client specifications.
+PHP implementation of SOAP 1.1 and 1.2 client specifications.
 
 Strengths: 
 

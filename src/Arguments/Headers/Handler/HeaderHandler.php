@@ -10,6 +10,9 @@ use JMS\Serializer\XmlSerializationVisitor;
 
 class HeaderHandler implements SubscribingHandlerInterface
 {
+    const SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
+    const SOAP_12 = 'http://www.w3.org/2003/05/soap-envelope';
+
     protected $headerData = [];
 
     public static function getSubscribingMethods()
@@ -60,10 +63,19 @@ class HeaderHandler implements SubscribingHandlerInterface
         if (!count($options)) {
             return;
         }
+        /**
+         * @var $currentNode \DOMNode
+         */
         $currentNode = $visitor->getCurrentNode();
         foreach ($options as $option => $value) {
             if ($option === 'mustUnderstand' || $option === 'required') {
-                $this->setAttributeOnNode($currentNode->lastChild, $option, "true", 'http://schemas.xmlsoap.org/soap/envelope/');
+
+                if ($currentNode->ownerDocument->documentElement->namespaceURI === self::SOAP_12) {
+                    $envelopeNS = self::SOAP_12;
+                } else {
+                    $envelopeNS = self::SOAP;
+                }
+                $this->setAttributeOnNode($currentNode->lastChild, $option, "true", $envelopeNS);
             }
         }
     }

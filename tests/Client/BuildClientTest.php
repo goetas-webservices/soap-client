@@ -1,6 +1,6 @@
 <?php
 
-namespace GoetasWebservices\SoapServices\Tests;
+namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;

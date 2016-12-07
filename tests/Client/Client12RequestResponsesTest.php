@@ -24,7 +24,7 @@ use JMS\Serializer\Handler\HandlerRegistryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
+class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 {
     protected static $namespaces = [
         'http://www.example.org/test/' => "Ex"
@@ -48,7 +48,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         self::$generator = new Generator(self::$namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
-        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl'], ['testSOAP']);
+        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl'] , ['testSOAP12']);
         self::$generator->registerAutoloader();
     }
 
@@ -97,8 +97,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public function testGetSimple()
     {
-        $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
-        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
           <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
@@ -108,7 +108,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
         /**
          * @var $response \Ex\GetSimpleResponse
          */
@@ -119,8 +119,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public function testGetSimpleUnwrapped()
     {
-        $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
-        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
           <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
@@ -140,7 +140,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $metadataReader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
 
         $this->factory->setMetadataReader($metadataReader);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
         /**
          * @var $response \Ex\GetSimpleResponse
          */
@@ -150,8 +150,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public function testHeaders()
     {
-        $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
-        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
           <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
@@ -162,7 +162,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append($httpResponse);
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $mp = new \Ex\GetReturnMultiParam();
         $mp->setIn("foo");
@@ -170,7 +170,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $client->getSimple("foo", new Header($mp));
         $client->getSimple("foo", new MustUnderstandHeader($mp));
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
@@ -185,14 +185,14 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             (string)$this->requestResponseStack[0]['request']->getBody());
 
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
               <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
-                <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/" SOAP:mustUnderstand="true">
+                <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope" SOAP:mustUnderstand="true">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
@@ -203,12 +203,12 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public function testNoOutput()
     {
         $this->responseMock->append(
-            new Response(200, ['Content-Type' => 'text/xml'], '
-            <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            new Response(200, ['Content-Type' => 'application/soap+xml'], '
+            <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body />
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $response = $client->noOutput("foo");
         $this->assertNull($response);
@@ -217,8 +217,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public function testNoInput()
     {
         $this->responseMock->append(
-            new Response(200, ['Content-Type' => 'text/xml'], '
-            <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            new Response(200, ['Content-Type' => 'application/soap+xml'], '
+            <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:noInputResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[A]]></out>
@@ -226,11 +226,11 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
               </SOAP:Body>
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $client->noInput("foo");
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope"/>',
             (string)$this->requestResponseStack[0]['request']->getBody()
         );
     }
@@ -240,16 +240,16 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append(
             new Response(
                 200,
-                ['Content-Type' => 'text/xml'],
-                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>'
+                ['Content-Type' => 'application/soap+xml'],
+                '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope"/>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $response = $client->noBoth("foo");
         $this->assertNull($response);
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope"/>',
             (string)$this->requestResponseStack[0]['request']->getBody()
         );
     }
@@ -259,8 +259,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append(
             new Response(
                 200,
-                ['Content-Type' => 'text/xml'],
-                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+                ['Content-Type' => 'application/soap+xml'],
+                '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getReturnMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[foo]]></out>
@@ -270,7 +270,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $mp = new \Ex\GetReturnMultiParam();
         $mp->setIn("foo");
@@ -281,7 +281,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($return['parameters']->getOut(), "foo");
 
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
@@ -296,8 +296,8 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append(
             new Response(
                 200,
-                ['Content-Type' => 'text/xml'],
-                '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+                ['Content-Type' => 'application/soap+xml'],
+                '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[A]]></out>
@@ -306,14 +306,14 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12', null, true);
 
         $mp = new \Ex\GetMultiParam();
         $mp->setIn("foo");
         $client->getMultiParam($mp, "str");
 
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
                 <ns-b3c6b39d:getMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
@@ -327,9 +327,9 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public function getErrorResponses()
     {
         return [
-            [new Response(500, ['Content-Type' => 'text/xml'], '<foo/>')],
+            [new Response(500, ['Content-Type' => 'application/soap+xml'], '<foo/>')],
             [new Response(500, ['Content-Type' => 'text/html'])],
-            [new Response(404, ['Content-Type' => 'text/xml'], '<foo/>')],
+            [new Response(404, ['Content-Type' => 'application/soap+xml'], '<foo/>')],
             [new Response(404, ['Content-Type' => 'text/html'])],
             [new Response(200, ['Content-Type' => 'text/html'])],
         ];
@@ -343,15 +343,15 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     public function testGetSimpleError(ResponseInterface $response)
     {
         $this->responseMock->append($response);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
         $client->getSimple("foo");
     }
 
     public function testApplicationError()
     {
         $this->responseMock->append(
-            new Response(500, ['Content-Type' => 'text/xml'], '
-            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+            new Response(500, ['Content-Type' => 'application/soap+xml'], '
+            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope">
                <SOAP-ENV:Body>
                    <SOAP-ENV:Fault>
                        <faultcode>SOAP-ENV:MustUnderstand</faultcode>
@@ -360,7 +360,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
                </SOAP-ENV:Body>
             </SOAP-ENV:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
 
         try {
             $client->getSimple("foo");

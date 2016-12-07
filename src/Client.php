@@ -71,7 +71,7 @@ class Client
 
         try {
             $response = $this->client->sendRequest($request);
-            if (strpos($response->getHeaderLine('Content-Type'), 'text/xml') !== 0) {
+            if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
                 throw new ServerException(
                     $response,
                     $request,
@@ -100,7 +100,7 @@ class Client
             $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
         } catch (HttpException $e) {
 
-            if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'text/xml') === 0) {
+            if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'xml') !== false) {
                 $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), Fault::class, 'xml');
                 throw new FaultException(
                     $fault,
@@ -120,14 +120,15 @@ class Client
                 );
             }
         }
-
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
     }
 
     protected function buildHeaders(array $operation)
     {
         return [
-            'Content-Type' => 'text/xml; charset=utf-8',
+            'Content-Type' => isset($operation['version']) && $operation['version'] === '1.2'
+                ? 'application/soap+xml; charset=utf-8'
+                : 'text/xml; charset=utf-8',
             'SoapAction' => '"' . $operation['action'] . '"',
         ];
     }
