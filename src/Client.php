@@ -71,7 +71,9 @@ class Client
 
         try {
             $response = $this->client->sendRequest($request);
-            if (strpos($response->getHeaderLine('Content-Type'), 'text/xml') !== 0) {
+            $xmlResponse = strpos($response->getHeaderLine('Content-Type'), 'text/xml') === 0;
+            $soapXmlResponse = strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') === 0;
+            if (!$xmlResponse && !$soapXmlResponse) {
                 throw new ServerException(
                     $response,
                     $request,
@@ -100,7 +102,9 @@ class Client
             $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
         } catch (HttpException $e) {
 
-            if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'text/xml') === 0) {
+            $xmlResponse = strpos($e->getResponse()->getHeaderLine('Content-Type'), 'text/xml') === 0;
+            $soapXmlResponse = strpos($e->getResponse()->getHeaderLine('Content-Type'), 'application/soap+xml') === 0;
+            if ($xmlResponse || $soapXmlResponse) {
                 $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), Fault::class, 'xml');
                 throw new FaultException(
                     $fault,

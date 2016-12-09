@@ -7,6 +7,7 @@ use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
+use GoetasWebservices\SoapServices\SoapClient\Exception\ServerException;
 use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
 use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
@@ -44,6 +45,11 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     protected $responseMock;
 
     protected $requestResponseStack = [];
+
+    /**
+     * @var ClientFactory
+     */
+    protected $factory;
 
     public static function setUpBeforeClass()
     {
@@ -370,4 +376,29 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testSoapXmlContentType()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
+          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+            <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <out><![CDATA[A]]></out>
+            </ns-b3c6b39d:getSimpleResponse>
+          </SOAP:Body>
+        </SOAP:Envelope>');
+
+        $this->responseMock->append($httpResponse);
+
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        /**
+         * @var $response \Ex\GetSimpleResponse
+         */
+        try {
+            $response = $client->getSimple("foo");
+            $this->assertInstanceOf('Ex\GetSimpleResponse', $response);
+            $this->assertEquals("A", $response->getOut());
+        } catch (ServerException $e) {
+            $this->fail($e->getMessage());
+        }
+    }
 }
