@@ -7,9 +7,9 @@ use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
-use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
+use GoetasWebservices\SoapServices\SoapClient\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -48,7 +48,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         self::$generator = new Generator(self::$namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
-        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl'] , ['testSOAP12']);
+        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl']);
         self::$generator->registerAutoloader();
     }
 
@@ -67,7 +67,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
             $h->registerSubscribingHandler($headerHandler);
         }, [
-            'GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope' => dirname($ref->getFileName()) . '/../../Resources/metadata/jms'
+            'GoetasWebservices\SoapServices\SoapClient\SoapEnvelope' => dirname($ref->getFileName()) . '/../../Resources/metadata/jms'
         ]);
 
         $this->responseMock = new MockHandler();

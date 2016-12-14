@@ -19,7 +19,7 @@ class Generate extends Command
         $this->setDefinition([
             new InputArgument('config', InputArgument::REQUIRED, 'Config file location'),
             new InputArgument('dest-dir', InputArgument::REQUIRED, 'Config file location'),
-            new InputOption('dest-class', null,  InputOption::VALUE_REQUIRED, 'Config file location'),
+            new InputOption('dest-class', null, InputOption::VALUE_REQUIRED, 'Config file location'),
         ]);
     }
 
@@ -30,16 +30,17 @@ class Generate extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $containerBuilder = new SoapContainerBuilder($input->getArgument('config'));
+        $logger = new ConsoleLogger($output);
+        $containerBuilder = new SoapContainerBuilder($input->getArgument('config'), $logger);
 
         if ($input->getOption('dest-class')) {
             $containerBuilder->setContainerClassName($input->getOption('dest-class'));
         }
 
         $debugContainer = $containerBuilder->getDebugContainer();
+        //$debugContainer->set('logger', $logger);
 
-
-        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.wsdl2php.config')['metadata'];
+        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
 
         $schemas = [];
         $portTypes = [];
@@ -55,6 +56,7 @@ class Generate extends Command
         $soapServices = $soapReader->getServices();
 
         foreach (['php', 'jms'] as $type) {
+
             $converter = $debugContainer->get('goetas_webservices.xsd2php.converter.' . $type);
             $wsdlConverter = $debugContainer->get('goetas_webservices.wsdl2php.converter.' . $type);
             $items = $wsdlConverter->visitServices($soapServices);

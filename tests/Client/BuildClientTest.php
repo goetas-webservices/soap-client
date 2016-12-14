@@ -3,8 +3,8 @@
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;

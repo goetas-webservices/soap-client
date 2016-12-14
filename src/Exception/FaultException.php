@@ -2,7 +2,7 @@
 
 namespace GoetasWebservices\SoapServices\SoapClient\Exception;
 
-use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
+use GoetasWebservices\SoapServices\SoapClient\SoapEnvelope\Parts\Fault;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 

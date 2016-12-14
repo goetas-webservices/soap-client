@@ -286,6 +286,7 @@
     <wsdl:message name="noOutputResponse"></wsdl:message>
     <wsdl:message name="noBothRequest"></wsdl:message>
     <wsdl:message name="noBothResponse"></wsdl:message>
+
     <wsdl:portType name="test">
         <wsdl:operation name="getSimple">
             <wsdl:input message="tns:getSimpleRequest"/>
@@ -342,6 +343,7 @@
             <wsdl:output message="tns:doSomethingResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
+
     <wsdl:binding name="testSOAP" type="tns:test">
 
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
