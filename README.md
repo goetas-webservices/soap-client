@@ -38,10 +38,10 @@ Add this packages to your `composer.json` file.
 ```
 {
     "require": {
-        "goetas-webservices/soap-client": "^0.1",
+        "goetas-webservices/soap-client": "^0.2",
     },
     "require-dev": {
-        "goetas-webservices/wsdl2php": "^0.2",
+        "goetas-webservices/wsdl2php": "^0.3",
     },
 }
 ```
@@ -69,7 +69,6 @@ soap_client:
     MyServiceName:
       MySoapPortName: http://localhost:8080/service
 
-xsd2php:
   namespaces:
     'http://www.example.org/test/': 'TestNs/MyApp'
   destinations_php:
@@ -80,7 +79,6 @@ xsd2php:
     'http://www.example.org/test/':
       MyCustomXSDType:  'MyCustomMappedPHPType'
 
-wsdl2php:
   metadata:
     'test.wsdl': ~
     'http://www.webservicex.net/weather.asmx?WSDL': ~
@@ -89,37 +87,37 @@ wsdl2php:
 This file has some important sections: 
 
 ### SOAP Specific
-* `soap_client.alternative_endpoints` (optional) allows you to specify alternative URLs that can be used
+* `alternative_endpoints` (optional) allows you to specify alternative URLs that can be used
  when developing your integration. 
  If this parameter is not present, will be used the URL defined by the WSDL file, 
  but if is set, will be used the specified URL for the service called 
  *MyServiceName* and on *MySoapPortName* port.
 
 
-* `soap_client.unwrap_returns` (optional, default: *false*) allows to define the "wrapped" SOAP services mode. 
+* `unwrap_returns` (optional, default: *false*) allows to define the "wrapped" SOAP services mode. 
  Instructs the client to "unwrap" all the returns.
 
 ### WSDL Specific
 
-* `wsdl2php.metadata` specifies where are placed WSDL files that will be used to generate al the required PHP metadata.
+* `metadata` specifies where are placed WSDL files that will be used to generate al the required PHP metadata.
 
  
 ### XML/XSD Specific
  
-* `xsd2php.namespaces` (required) defines the mapping between XML namespaces and PHP namespaces.
+* `namespaces` (required) defines the mapping between XML namespaces and PHP namespaces.
  (in the example we have the `http://www.example.org/test/` XML namespace mapped to `TestNs\MyApp`)
 
 
-* `xsd2php.destinations_php` (required) specifies the directory where to save the PHP classes that belongs to 
+* `destinations_php` (required) specifies the directory where to save the PHP classes that belongs to 
  `TestNs\MyApp` PHP namespace. (in this example `TestNs\MyApp` classes will ne saved into `soap/src` directory.
  
 
-* `xsd2php.destinations_jms` (required) specifies the directory where to save JMS Serializer metadata files 
+* `destinations_jms` (required) specifies the directory where to save JMS Serializer metadata files 
  that belongs to `TestNs\MyApp` PHP namespace. 
  (in this example `TestNs\MyApp` metadata will ne saved into `soap/metadata` directory.
  
  
-* `xsd2php.aliases` (optional) specifies some mappings that are handled by custom JMS serializer handlers.
+* `aliases` (optional) specifies some mappings that are handled by custom JMS serializer handlers.
  Allows to specify to do not generate metadata for some XML types, and assign them directly a PHP class.
  For that PHP class is necessary to create a custom JMS serialize/deserialize handler.
  
