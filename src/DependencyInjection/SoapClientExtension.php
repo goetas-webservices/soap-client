@@ -59,7 +59,7 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
 
 //////////
 
-        $metadataGenerator = $container->getDefinition('goetas_webservices.soap_common.metadata.generator');
+        $metadataGenerator = $container->getDefinition('goetas_webservices.soap_client.metadata.generator');
         foreach ($config['alternative_endpoints'] as $service => $data) {
             foreach ($data as $port => $endPoint) {
                 $metadataGenerator->addMethodCall('addAlternativeEndpoint', [$service, $port, $endPoint]);
@@ -74,9 +74,9 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
         $writer->addMethodCall('setUnwrap', [$config['unwrap_returns']]);
 
 
-        $forProduction = !!$container->getParameter('goetas_webservices.soap_common.metadata');
+        $forProduction = !!$container->getParameter('goetas_webservices.soap_client.metadata');
 
-        $readerName = 'goetas_webservices.soap_common.metadata_loader.' . ($forProduction ? 'array' : 'dev');
+        $readerName = 'goetas_webservices.soap_client.metadata_loader.' . ($forProduction ? 'array' : 'dev');
         $container->setAlias('goetas_webservices.soap_client.metadata_reader', $readerName);
 
     }
@@ -98,6 +98,6 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
      */
     public function prepend(ContainerBuilder $container)
     {
-        $container->prependExtensionConfig('goetas_soap_common', []);
+        $container->prependExtensionConfig('goetas_soap_client', []);
     }
 }

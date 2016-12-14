@@ -8,19 +8,19 @@
 
     <services>
 
-        <service id="goetas_webservices.soap_common.metadata_loader.dev" public="true"
+        <service id="goetas_webservices.soap_client.metadata_loader.dev" public="true"
                  class="GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader">
-            <argument type="service" id="goetas_webservices.soap_common.metadata.generator"/>
+            <argument type="service" id="goetas_webservices.soap_client.metadata.generator"/>
             <argument type="service" id="goetas_webservices.wsdl2php.soap_reader"/>
             <argument type="service" id="goetas_webservices.wsdl2php.wsdl_reader"/>
         </service>
 
-        <service id="goetas_webservices.soap_common.metadata_loader.array" public="false"
-                 class="GoetasWebservices\SoapServices\SoapClient\MetadataLoader\ArrayMetadataLoader">
-            <argument>%goetas_webservices.soap_common.metadata%</argument>
+        <service id="goetas_webservices.soap_client.metadata_loader.array" public="false"
+                 class="GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\ArrayMetadataLoader">
+            <argument>%goetas_webservices.soap_client.metadata%</argument>
         </service>
 
-        <service id="goetas_webservices.soap_common.metadata.generator" public="false"
+        <service id="goetas_webservices.soap_client.metadata.generator" public="false"
                  class="GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator">
             <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
             <argument type="collection"/>

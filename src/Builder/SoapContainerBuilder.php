@@ -91,7 +91,7 @@ class SoapContainerBuilder
 
 
         // set the production soap metadata
-        $container->setParameter('goetas_webservices.soap_common.metadata', $metadata);
+        $container->setParameter('goetas_webservices.soap_client.metadata', $metadata);
 
         $container->compile();
 
@@ -104,7 +104,7 @@ class SoapContainerBuilder
      */
     protected function fetchMetadata(ContainerInterface $debugContainer)
     {
-        $metadataReader = $debugContainer->get('goetas_webservices.soap_common.metadata_loader.dev');
+        $metadataReader = $debugContainer->get('goetas_webservices.soap_client.metadata_loader.dev');
         $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
         $metadata = [];
         foreach (array_keys($wsdlMetadata) as $uri) {
@@ -166,7 +166,7 @@ class SoapContainerBuilder
      */
     public static function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null)
     {
-        $destinations = $container->getParameter('goetas_webservices.xsd2php.config')['destinations_jms'];
+        $destinations = $container->getParameter('goetas_webservices.soap_client.config')['destinations_jms'];
         return self::createSerializerBuilder($destinations, $callback);
     }
 
