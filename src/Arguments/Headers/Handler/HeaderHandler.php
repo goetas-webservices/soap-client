@@ -68,14 +68,14 @@ class HeaderHandler implements SubscribingHandlerInterface
          */
         $currentNode = $visitor->getCurrentNode();
         foreach ($options as $option => $value) {
-            if ($option === 'mustUnderstand' || $option === 'required') {
+            if (in_array($option, ['mustUnderstand', 'required', 'role', 'actor'])) {
 
                 if ($currentNode->ownerDocument->documentElement->namespaceURI === self::SOAP_12) {
                     $envelopeNS = self::SOAP_12;
                 } else {
                     $envelopeNS = self::SOAP;
                 }
-                $this->setAttributeOnNode($currentNode->lastChild, $option, "true", $envelopeNS);
+                $this->setAttributeOnNode($currentNode->lastChild, $option, $value, $envelopeNS);
             }
         }
     }
@@ -85,7 +85,7 @@ class HeaderHandler implements SubscribingHandlerInterface
         if (!($prefix = $node->lookupPrefix($namespace)) && !($prefix = $node->ownerDocument->lookupPrefix($namespace))) {
             $prefix = 'ns-' . substr(sha1($namespace), 0, 8);
         }
-        $node->setAttributeNS($namespace, $prefix . ':' . $name, $value);
+        $node->setAttributeNS($namespace, $prefix . ':' . $name, is_bool($value) || is_null($value) ? ($value ? 'true' : 'false') : $value);
     }
 
 }
