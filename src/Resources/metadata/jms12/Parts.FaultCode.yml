@@ -1,0 +1,22 @@
+GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\FaultCode:
+    xml_root_namespace: 'http://www.w3.org/2003/05/soap-envelope'
+    properties:
+        value:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getValue
+                setter: setValue
+            serialized_name: Value
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: string
+        subcode:
+            expose: true
+            serialized_name: Subcode
+            accessor:
+                getter: getSubcode
+                setter: setSubcode
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\FaultCode

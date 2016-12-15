@@ -1,21 +1,28 @@
-GoetasWebservices\SoapServices\SoapClient\SoapEnvelope\Parts\Fault:
+GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault:
     xml_root_namespace: 'http://schemas.xmlsoap.org/soap/envelope/'
-    read_only: true
     exclusion_policy: all
-    virtual_properties:
-        getCode:
-            expose: true
-            serialized_name: faultcode
-            type: string
-        getDescription:
-            expose: true
-            serialized_name: faultstring
-            type: string
     properties:
-        actor:
+        code:
             expose: true
             access_type: public_method
             accessor:
-                getter: getActor
+                getter: getCode
+                setter: setCode
+            serialized_name: faultcode
+            type: string
+        string:
+            expose: true
+            serialized_name: faultstring
+            type: string
+        actor:
+            expose: true
             serialized_name: faultactor
             type: string
+        detail:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getDetail
+                setter: setDetail
+            serialized_name: detail
+            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault\FaultDetail
