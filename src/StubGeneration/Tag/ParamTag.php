@@ -37,7 +37,7 @@ class ParamTag extends ParamTagTag
     public function generateForMethod()
     {
         return ((!empty($this->types)) ? $this->getTypesAsString() : '')
-        . ((!empty($this->variableName)) ? ' $' . $this->variableName : '')
-        . ((!empty($this->default)) ? ' = ' . $this->default : '');
+            . ((!empty($this->variableName)) ? ' $' . $this->variableName : '')
+            . ((!empty($this->default)) ? ' = ' . $this->default : '');
     }
 }

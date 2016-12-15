@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/test/"
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://www.example.org/test/"
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
                   name="test" targetNamespace="http://www.example.org/test/">
@@ -126,14 +127,14 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="responseHader">
+            <xsd:element name="responseHeaderMessages">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="in" type="xsd:string"></xsd:element>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="responseHaderResponse">
+            <xsd:element name="responseHeaderMessagesResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="out" type="xsd:string"></xsd:element>
@@ -256,11 +257,11 @@
     <wsdl:message name="doSomethingResponse">
         <wsdl:part name="parameters" element="tns:doSomethingResponse"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="responseHaderRequest">
-        <wsdl:part name="parameters" element="tns:responseHader"></wsdl:part>
+    <wsdl:message name="responseHeaderMessagesRequest">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessages"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="responseHaderResponse">
-        <wsdl:part name="parameters" element="tns:responseHaderResponse"></wsdl:part>
+    <wsdl:message name="responseHeaderMessagesResponse">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessagesResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="responseFaultRequest">
         <wsdl:part name="parameters" element="tns:responseFault"></wsdl:part>
@@ -284,6 +285,7 @@
     <wsdl:message name="noOutputResponse"></wsdl:message>
     <wsdl:message name="noBothRequest"></wsdl:message>
     <wsdl:message name="noBothResponse"></wsdl:message>
+
     <wsdl:portType name="test">
         <wsdl:operation name="getSimple">
             <wsdl:input message="tns:getSimpleRequest"/>
@@ -305,9 +307,9 @@
             <wsdl:input message="tns:requestHeadersRequest"></wsdl:input>
             <wsdl:output message="tns:requestHeadersResponse"></wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="responseHader">
-            <wsdl:input message="tns:responseHaderRequest"></wsdl:input>
-            <wsdl:output message="tns:responseHaderResponse"></wsdl:output>
+        <wsdl:operation name="responseHeaderMessages">
+            <wsdl:input message="tns:responseHeaderMessagesRequest"></wsdl:input>
+            <wsdl:output message="tns:responseHeaderMessagesResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="responseFault">
             <wsdl:input message="tns:responseFaultRequest"></wsdl:input>
@@ -340,6 +342,7 @@
             <wsdl:output message="tns:doSomethingResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
+
     <wsdl:binding name="testSOAP" type="tns:test">
 
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -393,14 +396,16 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="responseHader">
-            <soap:operation soapAction="http://www.example.org/test/responseHader"/>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
                 <soap:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="responseFault">
@@ -458,6 +463,127 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
+
+    <wsdl:binding name="testSOAP12" type="tns:test">
+
+        <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getSimple">
+            <soap12:operation soapAction="http://www.example.org/test/getSimple"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getMultiParam">
+            <soap12:operation soapAction="http://www.example.org/test/getMultiParam"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getReturnMultiParam">
+            <soap12:operation soapAction="http://www.example.org/test/getReturnMultiParam"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeader">
+            <soap12:operation soapAction="http://www.example.org/test/requestHeader"/>
+            <wsdl:input>
+                <soap12:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeaders">
+            <soap12:operation soapAction="http://www.example.org/test/requestHeaders"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+                <soap12:header use="literal" part="header" message="tns:requestHeader">
+                    <soap12:headerfault use="literal" part="header" message="tns:requestHeader"/>
+                </soap12:header>
+                <soap12:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap12:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+                <soap12:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap12:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseFault">
+            <soap12:operation soapAction="http://www.example.org/test/responseFault"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap12:fault use="literal" name="error"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="responseFaults">
+            <soap12:operation soapAction="http://www.example.org/test/responseFaults"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap12:fault use="literal" name="error"/>
+            </wsdl:fault>
+            <wsdl:fault name="error2">
+                <soap12:fault use="literal" name="error2"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="noInput">
+            <soap12:operation soapAction="http://www.example.org/test/noInput"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noOutput">
+            <soap12:operation soapAction="http://www.example.org/test/noOutput"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noBoth">
+            <soap12:operation soapAction="http://www.example.org/test/noBoth"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
     <wsdl:binding name="alternativeBinding" type="tns:alternativeTPort">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="doSomething">
@@ -485,6 +611,9 @@
     <wsdl:service name="test">
         <wsdl:port binding="tns:testSOAP" name="testSOAP">
             <soap:address location="http://www.example.org/"/>
+        </wsdl:port>
+        <wsdl:port binding="tns:testSOAP12" name="testSOAP12">
+            <soap12:address location="http://www.example.org/12"/>
         </wsdl:port>
     </wsdl:service>
     <wsdl:service name="alternativeTest">

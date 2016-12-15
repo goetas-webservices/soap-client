@@ -4,8 +4,8 @@ namespace Example;
 /**
  * @var $loader \Composer\Autoload\ClassLoader
  */
+use GoetasWebservices\SoapServices\SoapClient\Builder\SoapContainerBuilder;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapCommon\Builder\SoapContainerBuilder;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;

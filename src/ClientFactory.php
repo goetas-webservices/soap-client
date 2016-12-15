@@ -2,7 +2,7 @@
 namespace GoetasWebservices\SoapServices\SoapClient;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\MetadataLoaderInterface;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\MetadataLoaderInterface;
 use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
 use GoetasWebservices\XML\WSDLReader\Exception\ServiceNotFoundException;
 use Http\Client\HttpClient;

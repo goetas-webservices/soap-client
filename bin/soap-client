@@ -11,7 +11,7 @@ foreach ($paths as $path) {
     }
 }
 
-error_reporting(error_reporting() & ~E_NOTICE);
+error_reporting(error_reporting() | E_ALL);
 $cli = new \Symfony\Component\Console\Application('Convert WSDL definitions to PHP classes Command Line Interface', "1.0");
 $cli->setCatchExceptions(true);
 $cli->add(new \GoetasWebservices\SoapServices\SoapClient\Command\Generate());

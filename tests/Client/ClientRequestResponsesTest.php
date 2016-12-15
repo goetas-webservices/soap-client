@@ -1,15 +1,16 @@
 <?php
 
-namespace GoetasWebservices\SoapServices\Tests;
+namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
+use GoetasWebservices\SoapServices\SoapClient\Envelope\Handler\FaultHandler;
+use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataGenerator\MetadataGenerator;
-use GoetasWebservices\SoapServices\SoapCommon\MetadataLoader\DevMetadataLoader;
-use GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope\Parts\Fault;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -63,11 +64,13 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $generator = new Generator(self::$namespaces);
         $ref = new \ReflectionClass(Fault::class);
-        $headerHandler =  new HeaderHandler();
+        $headerHandler = new HeaderHandler();
         $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
             $h->registerSubscribingHandler($headerHandler);
+            $h->registerSubscribingHandler(new FaultHandler());
         }, [
-            'GoetasWebservices\SoapServices\SoapCommon\SoapEnvelope' => dirname($ref->getFileName()) . '/../../Resources/metadata/jms'
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
         ]);
 
         $this->responseMock = new MockHandler();
@@ -332,6 +335,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             [new Response(404, ['Content-Type' => 'text/xml'], '<foo/>')],
             [new Response(404, ['Content-Type' => 'text/html'])],
             [new Response(200, ['Content-Type' => 'text/html'])],
+            //[new Response(200, ['Content-Type' => 'text/xml'], '<foo/>')],
         ];
     }
 

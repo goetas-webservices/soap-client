@@ -2,14 +2,20 @@
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
+use Symfony\Component\DependencyInjection\SimpleXMLElement;
 
 class HeaderHandler implements SubscribingHandlerInterface
 {
+    const SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
+    const SOAP_12 = 'http://www.w3.org/2003/05/soap-envelope';
+
     protected $headerData = [];
 
     public static function getSubscribingMethods()
@@ -21,7 +27,22 @@ class HeaderHandler implements SubscribingHandlerInterface
                 'type' => HeaderPlaceholder::class,
                 'method' => 'serializeHeader'
             ),
+            array(
+                'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
+                'format' => 'xml',
+                'type' => 'GoetasWebservices\SoapServices\SoapEnvelope\Headers',
+                'method' => 'deserializeHeaders'
+            ),
         );
+    }
+
+    public function deserializeHeaders(XmlDeserializationVisitor $visitor, \SimpleXMLElement $data, array $type, DeserializationContext $context)
+    {
+        $newType = [
+            'name' => $type['params'][0],
+            'params' => []
+        ];
+        return $context->getNavigator()->accept($data, $newType, $context);
     }
 
     public function addHeaderData(HeaderPlaceholder $reference, $data)
@@ -60,10 +81,19 @@ class HeaderHandler implements SubscribingHandlerInterface
         if (!count($options)) {
             return;
         }
+        /**
+         * @var $currentNode \DOMNode
+         */
         $currentNode = $visitor->getCurrentNode();
         foreach ($options as $option => $value) {
-            if ($option === 'mustUnderstand' || $option === 'required') {
-                $this->setAttributeOnNode($currentNode->lastChild, $option, "true", 'http://schemas.xmlsoap.org/soap/envelope/');
+            if (in_array($option, ['mustUnderstand', 'required', 'role', 'actor'])) {
+
+                if ($currentNode->ownerDocument->documentElement->namespaceURI === self::SOAP_12) {
+                    $envelopeNS = self::SOAP_12;
+                } else {
+                    $envelopeNS = self::SOAP;
+                }
+                $this->setAttributeOnNode($currentNode->lastChild, $option, $value, $envelopeNS);
             }
         }
     }
@@ -73,7 +103,7 @@ class HeaderHandler implements SubscribingHandlerInterface
         if (!($prefix = $node->lookupPrefix($namespace)) && !($prefix = $node->ownerDocument->lookupPrefix($namespace))) {
             $prefix = 'ns-' . substr(sha1($namespace), 0, 8);
         }
-        $node->setAttributeNS($namespace, $prefix . ':' . $name, $value);
+        $node->setAttributeNS($namespace, $prefix . ':' . $name, is_bool($value) || is_null($value) ? ($value ? 'true' : 'false') : $value);
     }
 
 }

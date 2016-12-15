@@ -5,7 +5,32 @@
     <parameters>
         <parameter key="goetas_webservices.soap_client.unwrap_returns" type="constant">FALSE</parameter>
     </parameters>
+
     <services>
+
+        <service id="goetas_webservices.soap_client.metadata_loader.dev" public="true"
+                 class="GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader">
+            <argument type="service" id="goetas_webservices.soap_client.metadata.generator"/>
+            <argument type="service" id="goetas_webservices.wsdl2php.soap_reader"/>
+            <argument type="service" id="goetas_webservices.wsdl2php.wsdl_reader"/>
+        </service>
+
+        <service id="goetas_webservices.soap_client.metadata_loader.array" public="false"
+                 class="GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\ArrayMetadataLoader">
+            <argument>%goetas_webservices.soap_client.metadata%</argument>
+        </service>
+
+        <service id="goetas_webservices.soap_client.metadata.generator" public="false"
+                 class="GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator">
+            <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
+            <argument type="collection"/>
+        </service>
+
+        <service id="goetas_webservices.xsd2php.naming_convention.short" public="false"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy"/>
+        <service id="goetas_webservices.xsd2php.naming_convention.long" public="false"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Naming\LongNamingStrategy"/>
+
 
         <service id="goetas_webservices.soap_client.metadata_reader" synthetic="true" public="true"></service>
 
@@ -18,6 +43,21 @@
             <argument type="collection"/>
         </service>
 
+
+        <service id="goetas_webservices.xsd2php.schema_reader" public="true"
+                 class="GoetasWebservices\XML\XSDReader\SchemaReader">
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service synthetic="true" public="false" id="goetas_webservices.xsd2php.naming_convention"/>
+        <service synthetic="true" abstract="true" id="logger"/>
+
+
+        <service id="goetas_webservices.xsd2php.path_generator.php.psr4" public="false"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Php\PathGenerator\Psr4PathGenerator"></service>
+        <service id="goetas_webservices.xsd2php.path_generator.jms.psr4" public="false"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Jms\PathGenerator\Psr4PathGenerator"></service>
+
         <service id="goetas_webservices.soap_client.stub.class_writer"
                  class="GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator">
             <argument id="goetas_webservices.xsd2php.converter.php" type="service"/>
@@ -25,6 +65,69 @@
             <argument>%goetas_webservices.soap_client.unwrap_returns%</argument>
             <argument type="collection"/>
         </service>
+
+
+        <service id="goetas_webservices.xsd2php.writer.php" class="GoetasWebservices\Xsd\XsdToPhp\Writer\PHPWriter">
+            <argument id="goetas_webservices.xsd2php.class_writer.php" type="service"/>
+            <argument id="goetas_webservices.xsd2php.php.class_generator" type="service"/>
+            <argument id="logger" type="service"/>
+        </service>
+
+        <service id="goetas_webservices.xsd2php.class_writer.php"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Writer\PHPClassWriter">
+            <argument id="goetas_webservices.xsd2php.path_generator.php" type="service"/>
+            <argument id="logger" type="service"/>
+        </service>
+
+        <service id="goetas_webservices.xsd2php.php.class_generator"
+                 class="GoetasWebservices\Xsd\XsdToPhp\Php\ClassGenerator"></service>
+
+        <service id="goetas_webservices.xsd2php.writer.jms" class="GoetasWebservices\Xsd\XsdToPhp\Writer\JMSWriter">
+            <argument id="goetas_webservices.xsd2php.path_generator.jms" type="service"/>
+            <argument id="logger" type="service"/>
+        </service>
+
+        <service id="goetas_webservices.wsdl2php.event_dispatcher"
+                 class="Symfony\Component\EventDispatcher\EventDispatcher">
+            <call method="addSubscriber">
+                <argument type="service" id="goetas_webservices.wsdl2php.soap_reader"/>
+            </call>
+        </service>
+
+        <service id="goetas_webservices.wsdl2php.soap_reader" class="GoetasWebservices\XML\SOAPReader\SoapReader"/>
+
+        <service id="goetas_webservices.wsdl2php.wsdl_reader"
+                 class="GoetasWebservices\XML\WSDLReader\DefinitionsReader">
+            <argument id="goetas_webservices.xsd2php.schema_reader" type="service"/>
+            <argument id="goetas_webservices.wsdl2php.event_dispatcher" type="service"/>
+        </service>
+
+        <service id="goetas_webservices.wsdl2php.converter.php"
+                 class="GoetasWebservices\WsdlToPhp\Generation\PhpSoapConverter">
+            <argument id="goetas_webservices.xsd2php.converter.php" type="service"/>
+        </service>
+
+
+        <service id="goetas_webservices.wsdl2php.converter.jms"
+                 class="GoetasWebservices\WsdlToPhp\Generation\JmsSoapConverter">
+            <argument id="goetas_webservices.xsd2php.converter.jms" type="service"/>
+        </service>
+
+
+        <service id="goetas_webservices.xsd2php.converter.php" class="GoetasWebservices\Xsd\XsdToPhp\Php\PhpConverter">
+            <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
+            <call method="setLogger">
+                <argument type="service" id="logger"></argument>
+            </call>
+        </service>
+
+        <service id="goetas_webservices.xsd2php.converter.jms" class="GoetasWebservices\Xsd\XsdToPhp\Jms\YamlConverter">
+            <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
+            <call method="setLogger">
+                <argument type="service" id="logger"></argument>
+            </call>
+        </service>
+
 
     </services>
 </container>

@@ -10,9 +10,9 @@ class ServerException extends \Exception
     private $request;
     private $response;
 
-    public function __construct(ResponseInterface $response, RequestInterface $request, $message = "", $code = 0, \Exception $previous = null)
+    public function __construct(ResponseInterface $response, RequestInterface $request, \Exception $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct("Server error", null, $previous);
         $this->response = $response;
         $this->request = $request;
     }

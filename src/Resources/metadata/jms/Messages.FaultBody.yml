@@ -1,0 +1,16 @@
+GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Messages\FaultBody:
+    xml_root_name: 'SOAP:Body'
+    xml_root_namespace: 'http://schemas.xmlsoap.org/soap/envelope/'
+    xml_namespaces:
+        SOAP: 'http://schemas.xmlsoap.org/soap/envelope/'
+    properties:
+        fault:
+            expose: true
+            access_type: public_method
+            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault
+            serialized_name: Fault
+            xml_element:
+                namespace: 'http://schemas.xmlsoap.org/soap/envelope/'
+            accessor:
+                getter: getFault
+                setter: setFault
