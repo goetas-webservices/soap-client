@@ -335,7 +335,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
             [new Response(404, ['Content-Type' => 'text/xml'], '<foo/>')],
             [new Response(404, ['Content-Type' => 'text/html'])],
             [new Response(200, ['Content-Type' => 'text/html'])],
-            [new Response(200, ['Content-Type' => 'text/xml'], '<foo/>')],
+            //[new Response(200, ['Content-Type' => 'text/xml'], '<foo/>')],
         ];
     }
 
