@@ -1,6 +1,6 @@
 <?php
 
-namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
+namespace GoetasWebservices\SoapServices\SoapClient\Tests\DependencyInjection;
 
 use GoetasWebservices\SoapServices\SoapClient\Builder\SoapContainerBuilder;
 
