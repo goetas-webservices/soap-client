@@ -4,18 +4,20 @@ namespace GoetasWebservices\SoapServices\SoapClient;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReader;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReaderInterface;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
+use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Messages\Fault as Fault11;
+use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\Fault as Fault12;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
-use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ServerException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\SoapException;
+use GoetasWebservices\SoapServices\SoapClient\Exception\UnexpectedFormatException;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreator;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreatorInterface;
-use GoetasWebservices\SoapServices\SoapClient\SoapEnvelope\Parts\Fault;
 use GoetasWebservices\SoapServices\SoapEnvelope;
 use Http\Client\Exception\HttpException;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use JMS\Serializer\Serializer;
+use Psr\Http\Message\ResponseInterface;
 
 class Client
 {
@@ -71,7 +73,7 @@ class Client
         try {
             $response = $this->client->sendRequest($request);
             if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
-                throw new ServerException(
+                throw new UnexpectedFormatException(
                     $response,
                     $request,
                     "Unexpected content type '" . $response->getHeaderLine('Content-Type') . "'"
@@ -84,42 +86,38 @@ class Client
             }
 
             $body = (string)$response->getBody();
-            if (strpos($body, ':Fault>')!==false) {
-                $fault = $this->serializer->deserialize($body, Fault::class, 'xml');
-                throw new FaultException(
-                    $fault,
-                    $response,
-                    $request,
-                    "SOAP Fault",
-                    null,
-                    new \Exception()
-                );
+
+            $faultClass = $this->findFaultClass($response);
+
+            if (strpos($body, ':Fault>') !== false) { // some server returns a fault with 200 OK HTTP
+                $fault = $this->serializer->deserialize($body, $faultClass, 'xml');
+                throw $fault->createException($response, $request);
             }
 
             $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
         } catch (HttpException $e) {
-
             if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'xml') !== false) {
-                $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), Fault::class, 'xml');
-                throw new FaultException(
-                    $fault,
-                    $e->getResponse(),
-                    $e->getRequest(),
-                    $e->getMessage(),
-                    null,
-                    $e
-                );
+                $faultClass = $this->findFaultClass($e->getResponse());
+                $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), $faultClass, 'xml');
+                throw $fault->createException($e->getResponse(), $e->getRequest(), $e);
             } else {
                 throw new ServerException(
                     $e->getResponse(),
                     $e->getRequest(),
-                    $e->getMessage(),
-                    null,
                     $e
                 );
             }
         }
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
+    }
+
+    public function findFaultClass(ResponseInterface $response)
+    {
+        if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') === 0) {
+            return Fault12::class;
+        } else {
+            return Fault11::class;
+        }
     }
 
     protected function buildHeaders(array $operation)

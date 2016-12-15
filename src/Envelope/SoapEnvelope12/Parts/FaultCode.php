@@ -23,6 +23,14 @@ class FaultCode
     }
 
     /**
+     * @param string $value
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
      * @return FaultCode
      */
     public function getSubcode()
@@ -37,15 +45,6 @@ class FaultCode
     {
         $this->subcode = $subcode;
     }
-
-    /**
-     * @param string $value
-     */
-    public function setValue($value)
-    {
-        $this->value = $value;
-    }
-
 
     public function __toString()
     {

@@ -27,7 +27,7 @@ class FaultHandler implements SubscribingHandlerInterface
         $document = new \DOMDocument('1.0', 'utf-8');
 
         $xml = '';
-        foreach ($domElement->childNodes as $child){
+        foreach ($domElement->childNodes as $child) {
             $newEl = $document->importNode($child, true);
             $xml .= $document->saveXML($newEl);
         }

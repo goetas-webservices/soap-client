@@ -53,11 +53,28 @@ class Fault
     }
 
     /**
+     * @param string $role
+     * @return Fault
+     */
+    public function setRole($role)
+    {
+        $this->role = $role;
+    }
+
+    /**
      * @return string
      */
     public function getNode()
     {
         return $this->node;
+    }
+
+    /**
+     * @param string $node
+     */
+    public function setNode($node)
+    {
+        $this->node = $node;
     }
 
     /**
@@ -69,28 +86,11 @@ class Fault
     }
 
     /**
-     * @param string $role
-     * @return Fault
-     */
-    public function setRole($role)
-    {
-        $this->role = $role;
-    }
-
-    /**
      * @param FaultCode $code
      */
     public function setCode($code)
     {
         $this->code = $code;
-    }
-
-    /**
-     * @param string[] $reason
-     */
-    public function setReason(array $reason)
-    {
-        $this->reason = $reason;
     }
 
     /**
@@ -102,11 +102,11 @@ class Fault
     }
 
     /**
-     * @param string $node
+     * @param string[] $reason
      */
-    public function setNode($node)
+    public function setReason(array $reason)
     {
-        $this->node = $node;
+        $this->reason = $reason;
     }
 
 }
