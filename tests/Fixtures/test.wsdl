@@ -127,14 +127,14 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="responseHader">
+            <xsd:element name="responseHeaderMessages">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="in" type="xsd:string"></xsd:element>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="responseHaderResponse">
+            <xsd:element name="responseHeaderMessagesResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="out" type="xsd:string"></xsd:element>
@@ -257,11 +257,11 @@
     <wsdl:message name="doSomethingResponse">
         <wsdl:part name="parameters" element="tns:doSomethingResponse"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="responseHaderRequest">
-        <wsdl:part name="parameters" element="tns:responseHader"></wsdl:part>
+    <wsdl:message name="responseHeaderMessagesRequest">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessages"></wsdl:part>
     </wsdl:message>
-    <wsdl:message name="responseHaderResponse">
-        <wsdl:part name="parameters" element="tns:responseHaderResponse"></wsdl:part>
+    <wsdl:message name="responseHeaderMessagesResponse">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessagesResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="responseFaultRequest">
         <wsdl:part name="parameters" element="tns:responseFault"></wsdl:part>
@@ -307,9 +307,9 @@
             <wsdl:input message="tns:requestHeadersRequest"></wsdl:input>
             <wsdl:output message="tns:requestHeadersResponse"></wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="responseHader">
-            <wsdl:input message="tns:responseHaderRequest"></wsdl:input>
-            <wsdl:output message="tns:responseHaderResponse"></wsdl:output>
+        <wsdl:operation name="responseHeaderMessages">
+            <wsdl:input message="tns:responseHeaderMessagesRequest"></wsdl:input>
+            <wsdl:output message="tns:responseHeaderMessagesResponse"></wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="responseFault">
             <wsdl:input message="tns:responseFaultRequest"></wsdl:input>
@@ -396,14 +396,16 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="responseHader">
-            <soap:operation soapAction="http://www.example.org/test/responseHader"/>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
                 <soap:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="responseFault">
@@ -515,14 +517,15 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="responseHader">
-            <soap12:operation soapAction="http://www.example.org/test/responseHader"/>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap12:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
                 <soap12:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap12:header use="literal" part="headerLocal" message="tns:requestHeader"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="responseFault">

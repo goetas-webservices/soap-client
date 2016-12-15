@@ -203,6 +203,34 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
             (string)$this->requestResponseStack[1]['request']->getBody());
     }
 
+    public function testResponseHeaders()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'],
+            '<soapenv:Envelope 
+                    xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" 
+                    xmlns:test="http://www.example.org/test/">
+               <soapenv:Header>
+                  <test:authHeader>
+                     <user>username</user>
+                     <pwd>pass</pwd>
+                  </test:authHeader>
+               </soapenv:Header>
+               <soapenv:Body>
+                  <test:responseHeaderMessagesResponse>
+                     <out>str</out>
+                  </test:responseHeaderMessagesResponse>
+               </soapenv:Body>
+            </soapenv:Envelope>');
+
+        $this->responseMock->append($httpResponse);
+
+
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
+
+        $res = $client->responseHeaderMessages("foo");
+        $this->assertEquals("str", $res->getOut());
+    }
+
     public function testNoOutput()
     {
         $this->responseMock->append(

@@ -2,11 +2,14 @@
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
+use Symfony\Component\DependencyInjection\SimpleXMLElement;
 
 class HeaderHandler implements SubscribingHandlerInterface
 {
@@ -24,7 +27,22 @@ class HeaderHandler implements SubscribingHandlerInterface
                 'type' => HeaderPlaceholder::class,
                 'method' => 'serializeHeader'
             ),
+            array(
+                'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
+                'format' => 'xml',
+                'type' => 'GoetasWebservices\SoapServices\SoapEnvelope\Headers',
+                'method' => 'deserializeHeaders'
+            ),
         );
+    }
+
+    public function deserializeHeaders(XmlDeserializationVisitor $visitor, \SimpleXMLElement $data, array $type, DeserializationContext $context)
+    {
+        $newType = [
+            'name' => $type['params'][0],
+            'params' => []
+        ];
+        return $context->getNavigator()->accept($data, $newType, $context);
     }
 
     public function addHeaderData(HeaderPlaceholder $reference, $data)

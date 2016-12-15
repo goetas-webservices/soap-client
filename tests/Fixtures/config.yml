@@ -15,5 +15,5 @@ soap_client:
     'TestNs': soap/metadata
   aliases:
     'http://www.example.org/test/':
-      responseHaderResponse:  'HeaderResponse'
+      responseHeaderMessagesResponse:  'HeaderResponse'
 
