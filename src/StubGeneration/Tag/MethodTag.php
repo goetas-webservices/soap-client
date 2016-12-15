@@ -24,13 +24,13 @@ class MethodTag extends BaseMethodTag
     public function generateParams()
     {
         $params = array_map(function (ParamTag $paramTag) {
-            if ($paramTag instanceof \GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag){
+            if ($paramTag instanceof \GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag) {
                 return $paramTag->generateForMethod();
             }
             return
                 ((!empty($paramTag->getTypes())) ? $paramTag->getTypesAsString() : '')
                 . ((!empty($paramTag->getVariableName())) ? ' $' . $paramTag->getVariableName() : '');
-        }, $this->params );
+        }, $this->params);
 
 
         return implode(', ', $params);

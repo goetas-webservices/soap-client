@@ -46,7 +46,7 @@ class Fault implements FaultMessageInterface
      * @param \Exception $e
      * @return FaultException
      */
-    public function createException(ResponseInterface $response, RequestInterface $request, \Exception $e=null)
+    public function createException(ResponseInterface $response, RequestInterface $request, \Exception $e = null)
     {
         if (!$this->getBody() || !$this->getBody()->getFault()) {
             throw new FaultException($response, $request, $e);

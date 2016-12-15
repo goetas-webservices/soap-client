@@ -6,7 +6,6 @@ use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\MethodTag;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag;
 use GoetasWebservices\XML\WSDLReader\Wsdl\Message\Part;
 use GoetasWebservices\XML\WSDLReader\Wsdl\PortType;
-use GoetasWebservices\XML\WSDLReader\Wsdl\Service;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\NamingStrategy;
 use GoetasWebservices\Xsd\XsdToPhp\Php\PhpConverter;
 use Zend\Code\Generator\ClassGenerator;
@@ -133,7 +132,7 @@ class ClientStubGenerator
                 $class = $this->getClassFromPart($part);
 
                 $typeName = $class->getPhpType();
-                if ($t = $class->isSimpleType()){
+                if ($t = $class->isSimpleType()) {
                     $typeName = $t->getType()->getPhpType();
                 }
                 $params[] = $param = new ParamTag($partName, [$typeName]);
@@ -163,20 +162,21 @@ class ClientStubGenerator
         if ($this->unwrapReturn) {
             foreach ($class->getProperties() as $property) {
                 $propertyClass = $property->getType();
-                if ($t = $propertyClass->isSimpleType()){
+                if ($t = $propertyClass->isSimpleType()) {
                     return [$t->getType()->getPhpType()];
                 }
                 return [$propertyClass->getPhpType()];
             }
         }
 
-        if ($t = $class->isSimpleType()){
+        if ($t = $class->isSimpleType()) {
             return [$t->getType()->getPhpType()];
         }
         return [$class->getPhpType()];
     }
 
-    private function getClassFromPart(Part $part){
+    private function getClassFromPart(Part $part)
+    {
         if ($part->getType()) {
             return $this->phpConverter->visitType($part->getType());
         } else {
@@ -191,7 +191,7 @@ class ClientStubGenerator
     private function extractSinglePartParameters(Part $part)
     {
         $params = [];
-        $class =  $this->getClassFromPart($part);
+        $class = $this->getClassFromPart($part);
 
         foreach ($class->getPropertiesInHierarchy() as $property) {
             $t = $property->getType()->getPhpType();

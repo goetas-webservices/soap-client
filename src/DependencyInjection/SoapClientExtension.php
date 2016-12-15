@@ -42,7 +42,7 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
 
 
         foreach (['php', 'jms'] as $type) {
-            $converter = $container->getDefinition('goetas_webservices.xsd2php.converter.'.$type);
+            $converter = $container->getDefinition('goetas_webservices.xsd2php.converter.' . $type);
             foreach ($config['namespaces'] as $xml => $php) {
                 $converter->addMethodCall('addNamespace', [$xml, self::sanitizePhp($php)]);
             }
