@@ -14,10 +14,16 @@ GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault:
             expose: true
             serialized_name: faultstring
             type: string
+            accessor:
+                getter: getString
+                setter: setString
         actor:
             expose: true
             serialized_name: faultactor
             type: string
+            accessor:
+                getter: getActor
+                setter: setActor
         detail:
             expose: true
             access_type: public_method

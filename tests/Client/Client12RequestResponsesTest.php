@@ -115,7 +115,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         /**
          * @var $response \Ex\GetSimpleResponse
          */
-        $response = $client->getSimple("foo");
+        $response = $client->getsimple("foo");
         $this->assertInstanceOf('Ex\GetSimpleResponse', $response);
         $this->assertEquals("A", $response->getOut());
     }
@@ -335,6 +335,12 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
             [new Response(404, ['Content-Type' => 'application/soap+xml'], '<foo/>')],
             [new Response(404, ['Content-Type' => 'text/html'])],
             [new Response(200, ['Content-Type' => 'text/html'])],
+            [new Response(200, ['Content-Type' => 'application/soap+xml'], '
+            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope">
+               <SOAP-ENV:Body>
+                   <SOAP-ENV:Fault></SOAP-ENV:Fault>
+               </SOAP-ENV:Body>
+            </SOAP-ENV:Envelope>')]
             //[new Response(200, ['Content-Type' => 'application/soap+xml'], '<foo/>')],
         ];
     }
