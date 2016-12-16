@@ -44,7 +44,7 @@ class WssSecurityTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testFault12()
+    public function testSerializeSecurity()
     {
         $wssec = new Security();
         $wssec->setUsername('foo');
@@ -66,7 +66,30 @@ class WssSecurityTest extends \PHPUnit_Framework_TestCase
             <Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest"><![CDATA[aw4f+UvW8DfCB+ycsauhJzRXFHo=]]></Password>
           </UsernameToken>
         </Security>', $xml);
+    }
 
+    public function testUnserialize()
+    {
+        $wssec = new Security();
+        $wssec->setUsername('foo');
+        $wssec->setPassword('bar');
+        $wssec->setTimestamp(new \DateTime('2010-01-01 00:00:00', new \DateTimeZone('UTC')));
+
+        $xml = $this->serializer->serialize($wssec, 'xml');
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+        <Security xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+          <ns-e2891a80:Timestamp xmlns:ns-e2891a80="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+            <ns-e2891a80:Created><![CDATA[2010-01-01T00:00:00.000Z]]></ns-e2891a80:Created>
+            <ns-e2891a80:Expires><![CDATA[2010-01-01T00:05:00.000Z]]></ns-e2891a80:Expires>
+          </ns-e2891a80:Timestamp>
+          <UsernameToken xmlns:ns-e2891a80="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+            <Username><![CDATA[foo]]></Username>
+            <Nonce><![CDATA[eHg=]]></Nonce>
+            <ns-e2891a80:Created xmlns:ns-e2891a80="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><![CDATA[2010-01-01T00:00:00.000Z]]></ns-e2891a80:Created>
+            <Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest"><![CDATA[aw4f+UvW8DfCB+ycsauhJzRXFHo=]]></Password>
+          </UsernameToken>
+        </Security>', $xml);
     }
 
 
