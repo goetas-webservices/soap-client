@@ -1,0 +1,22 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\X509IssuerSerialType:
+    properties:
+        x509IssuerName:
+            expose: true
+            access_type: public_method
+            serialized_name: X509IssuerName
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509IssuerName
+                setter: setX509IssuerName
+            type: string
+        x509SerialNumber:
+            expose: true
+            access_type: public_method
+            serialized_name: X509SerialNumber
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509SerialNumber
+                setter: setX509SerialNumber
+            type: integer

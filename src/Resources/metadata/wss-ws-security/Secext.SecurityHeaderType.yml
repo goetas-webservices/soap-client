@@ -1,0 +1,6 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext\SecurityHeaderType:
+    properties:
+        anyAttribute:
+            exclude: true
+        anyElement:
+            exclude: true

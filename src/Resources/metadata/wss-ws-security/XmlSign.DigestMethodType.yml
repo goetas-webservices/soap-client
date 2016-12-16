@@ -1,0 +1,13 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\DigestMethodType:
+    properties:
+        algorithm:
+            expose: true
+            access_type: public_method
+            serialized_name: Algorithm
+            accessor:
+                getter: getAlgorithm
+                setter: setAlgorithm
+            xml_attribute: true
+            type: string
+        anyElement:
+            exclude: true

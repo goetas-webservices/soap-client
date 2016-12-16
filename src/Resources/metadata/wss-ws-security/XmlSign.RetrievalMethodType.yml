@@ -1,0 +1,34 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\RetrievalMethodType:
+    properties:
+        uRI:
+            expose: true
+            access_type: public_method
+            serialized_name: URI
+            accessor:
+                getter: getURI
+                setter: setURI
+            xml_attribute: true
+            type: string
+        type:
+            expose: true
+            access_type: public_method
+            serialized_name: Type
+            accessor:
+                getter: getType
+                setter: setType
+            xml_attribute: true
+            type: string
+        transforms:
+            expose: true
+            access_type: public_method
+            serialized_name: Transforms
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getTransforms
+                setter: setTransforms
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\Transform>
+            xml_list:
+                inline: false
+                entry_name: Transform
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'

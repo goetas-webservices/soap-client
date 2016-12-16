@@ -1,0 +1,22 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\SignaturePropertyType:
+    properties:
+        target:
+            expose: true
+            access_type: public_method
+            serialized_name: Target
+            accessor:
+                getter: getTarget
+                setter: setTarget
+            xml_attribute: true
+            type: string
+        id:
+            expose: true
+            access_type: public_method
+            serialized_name: Id
+            accessor:
+                getter: getId
+                setter: setId
+            xml_attribute: true
+            type: string
+        anyElement:
+            exclude: true

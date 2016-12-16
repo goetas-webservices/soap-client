@@ -9,7 +9,6 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
-use Symfony\Component\DependencyInjection\SimpleXMLElement;
 
 class HeaderHandler implements SubscribingHandlerInterface
 {

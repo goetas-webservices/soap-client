@@ -1,0 +1,72 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\DSAKeyValueType:
+    properties:
+        p:
+            expose: true
+            access_type: public_method
+            serialized_name: P
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getP
+                setter: setP
+            type: \AnySimpleType
+        q:
+            expose: true
+            access_type: public_method
+            serialized_name: Q
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getQ
+                setter: setQ
+            type: \AnySimpleType
+        g:
+            expose: true
+            access_type: public_method
+            serialized_name: G
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getG
+                setter: setG
+            type: \AnySimpleType
+        y:
+            expose: true
+            access_type: public_method
+            serialized_name: Y
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getY
+                setter: setY
+            type: \AnySimpleType
+        j:
+            expose: true
+            access_type: public_method
+            serialized_name: J
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getJ
+                setter: setJ
+            type: \AnySimpleType
+        seed:
+            expose: true
+            access_type: public_method
+            serialized_name: Seed
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getSeed
+                setter: setSeed
+            type: \AnySimpleType
+        pgenCounter:
+            expose: true
+            access_type: public_method
+            serialized_name: PgenCounter
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getPgenCounter
+                setter: setPgenCounter
+            type: \AnySimpleType

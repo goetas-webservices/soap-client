@@ -1,0 +1,45 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\SignedInfoType:
+    properties:
+        id:
+            expose: true
+            access_type: public_method
+            serialized_name: Id
+            accessor:
+                getter: getId
+                setter: setId
+            xml_attribute: true
+            type: string
+        canonicalizationMethod:
+            expose: true
+            access_type: public_method
+            serialized_name: CanonicalizationMethod
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getCanonicalizationMethod
+                setter: setCanonicalizationMethod
+            type: GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\CanonicalizationMethod
+        signatureMethod:
+            expose: true
+            access_type: public_method
+            serialized_name: SignatureMethod
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getSignatureMethod
+                setter: setSignatureMethod
+            type: GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\SignatureMethod
+        reference:
+            expose: true
+            access_type: public_method
+            serialized_name: Reference
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getReference
+                setter: setReference
+            xml_list:
+                inline: true
+                entry_name: Reference
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\Reference>

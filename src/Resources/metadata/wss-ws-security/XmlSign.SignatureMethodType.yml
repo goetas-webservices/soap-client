@@ -1,0 +1,23 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\SignatureMethodType:
+    properties:
+        algorithm:
+            expose: true
+            access_type: public_method
+            serialized_name: Algorithm
+            accessor:
+                getter: getAlgorithm
+                setter: setAlgorithm
+            xml_attribute: true
+            type: string
+        hMACOutputLength:
+            expose: true
+            access_type: public_method
+            serialized_name: HMACOutputLength
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getHMACOutputLength
+                setter: setHMACOutputLength
+            type: integer
+        anyElement:
+            exclude: true

@@ -1,0 +1,6 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext\TransformationParametersType:
+    properties:
+        anyAttribute:
+            exclude: true
+        anyElement:
+            exclude: true

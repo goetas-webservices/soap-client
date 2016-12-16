@@ -1,0 +1,74 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\X509DataType:
+    properties:
+        x509IssuerSerial:
+            expose: true
+            access_type: public_method
+            serialized_name: X509IssuerSerial
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509IssuerSerial
+                setter: setX509IssuerSerial
+            xml_list:
+                inline: true
+                entry_name: X509IssuerSerial
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\X509IssuerSerialType>
+        x509SKI:
+            expose: true
+            access_type: public_method
+            serialized_name: X509SKI
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509SKI
+                setter: setX509SKI
+            xml_list:
+                inline: true
+                entry_name: X509SKI
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<\AnySimpleType>
+        x509SubjectName:
+            expose: true
+            access_type: public_method
+            serialized_name: X509SubjectName
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509SubjectName
+                setter: setX509SubjectName
+            xml_list:
+                inline: true
+                entry_name: X509SubjectName
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<string>
+        x509Certificate:
+            expose: true
+            access_type: public_method
+            serialized_name: X509Certificate
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509Certificate
+                setter: setX509Certificate
+            xml_list:
+                inline: true
+                entry_name: X509Certificate
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<\AnySimpleType>
+        x509CRL:
+            expose: true
+            access_type: public_method
+            serialized_name: X509CRL
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509CRL
+                setter: setX509CRL
+            xml_list:
+                inline: true
+                entry_name: X509CRL
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<\AnySimpleType>
+        anyElement:
+            exclude: true

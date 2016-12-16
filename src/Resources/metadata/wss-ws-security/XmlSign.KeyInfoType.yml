@@ -1,0 +1,111 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\KeyInfoType:
+    properties:
+        id:
+            expose: true
+            access_type: public_method
+            serialized_name: Id
+            accessor:
+                getter: getId
+                setter: setId
+            xml_attribute: true
+            type: string
+        keyName:
+            expose: true
+            access_type: public_method
+            serialized_name: KeyName
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getKeyName
+                setter: setKeyName
+            xml_list:
+                inline: true
+                entry_name: KeyName
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<string>
+        keyValue:
+            expose: true
+            access_type: public_method
+            serialized_name: KeyValue
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getKeyValue
+                setter: setKeyValue
+            xml_list:
+                inline: true
+                entry_name: KeyValue
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\KeyValue>
+        retrievalMethod:
+            expose: true
+            access_type: public_method
+            serialized_name: RetrievalMethod
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getRetrievalMethod
+                setter: setRetrievalMethod
+            xml_list:
+                inline: true
+                entry_name: RetrievalMethod
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\RetrievalMethod>
+        x509Data:
+            expose: true
+            access_type: public_method
+            serialized_name: X509Data
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getX509Data
+                setter: setX509Data
+            xml_list:
+                inline: true
+                entry_name: X509Data
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\X509Data>
+        pGPData:
+            expose: true
+            access_type: public_method
+            serialized_name: PGPData
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getPGPData
+                setter: setPGPData
+            xml_list:
+                inline: true
+                entry_name: PGPData
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\PGPData>
+        sPKIData:
+            expose: true
+            access_type: public_method
+            serialized_name: SPKIData
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getSPKIData
+                setter: setSPKIData
+            type: array<\AnySimpleType>
+            xml_list:
+                inline: false
+                entry_name: SPKISexp
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+        mgmtData:
+            expose: true
+            access_type: public_method
+            serialized_name: MgmtData
+            xml_element:
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            accessor:
+                getter: getMgmtData
+                setter: setMgmtData
+            xml_list:
+                inline: true
+                entry_name: MgmtData
+                namespace: 'http://www.w3.org/2000/09/xmldsig#'
+            type: array<string>
+        anyElement:
+            exclude: true

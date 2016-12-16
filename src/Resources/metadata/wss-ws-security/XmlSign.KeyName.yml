@@ -1,0 +1,12 @@
+GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\KeyName:
+    xml_root_name: KeyName
+    xml_root_namespace: 'http://www.w3.org/2000/09/xmldsig#'
+    properties:
+        __value:
+            expose: true
+            xml_value: true
+            access_type: public_method
+            accessor:
+                getter: value
+                setter: value
+            type: string
