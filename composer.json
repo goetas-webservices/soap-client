@@ -26,6 +26,8 @@
     "goetas-webservices/wsdl2php": "^0.4",
     "goetas-webservices/xsd2php": "^0.2.3",
 
+    "jms/serializer": "dev-xml-namespaces-improvements as 1.5.0",
+
     "goetas-webservices/wsdl-reader": "^v0.3.1",
 
     "ass/xmlsecurity" : "^1.0",
