@@ -37,6 +37,9 @@ The recommended way to install goetas-webservices / soap-client is using [Compos
 ```
 composer require goetas-webservices/soap-client
 composer require goetas-webservices/wsdl2php --dev
+
+# to use WS Security
+composer require ass/xmlsecurity
 ```
 
 More dependencies might be needed depending on your PSR-7 and HTTP client preferred implementation.
