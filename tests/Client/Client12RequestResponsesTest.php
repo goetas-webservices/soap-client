@@ -28,7 +28,10 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 {
     protected static $namespaces = [
-        'http://www.example.org/test/' => "Ex"
+        'http://www.example.org/test/' => "Ex",
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext',
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Utility',
+        'http://www.w3.org/2000/09/xmldsig#' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign',
     ];
     /**
      * @var Generator

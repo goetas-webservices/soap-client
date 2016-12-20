@@ -83,7 +83,12 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                 ->end()
 
-
+                ->scalarNode('any_element')
+                    ->defaultValue(false)
+                ->end()
+                ->scalarNode('any_attribute')
+                    ->defaultValue(false)
+                ->end()
 
 
 

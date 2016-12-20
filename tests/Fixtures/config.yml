@@ -6,14 +6,27 @@ soap_client:
       port: xxx
   namespaces:
     'http://www.example.org/test/': 'TestNs'
+
+    'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd': 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext'
+    'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd': 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Utility'
+    'http://www.w3.org/2000/09/xmldsig#': 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign'
+
   destinations_php:
     'TestNs': soap/src
+
+    'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity': null
+
   destinations_jms:
     'TestNs\SoapEnvelope12': soap/metadata/soap-env-12
     'TestNs\SoapEnvelope': soap/metadata/soap-env-11
     'TestNs\SoapParts': soap/metadata/soap-parts
     'TestNs': soap/metadata
+
+    'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity': null
+
   aliases:
     'http://www.example.org/test/':
       responseHeaderMessagesResponse:  'HeaderResponse'
+    'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd':
+      Security: GoetasWebservices\SoapServices\SoapEnvelope\Headers
 

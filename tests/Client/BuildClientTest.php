@@ -18,16 +18,20 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
      */
     protected $factory;
 
+    protected static $namespaces = [
+        'http://www.example.org/test/' => "Ex",
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext',
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Utility',
+        'http://www.w3.org/2000/09/xmldsig#' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign',
+    ];
+
     public function setUp()
     {
-        $namespaces = [
-            'http://www.example.org/test/' => "Ex"
-        ];
-        $generator = new Generator($namespaces);
+        $generator = new Generator(self::$namespaces);
         $serializer = $generator->buildSerializer();
 
         $naming = new ShortNamingStrategy();
-        $metadataGenerator = new MetadataGenerator($naming, $namespaces);
+        $metadataGenerator = new MetadataGenerator($naming, self::$namespaces);
 
         $dispatcher = new EventDispatcher();
         $wsdlReader = new DefinitionsReader(null, $dispatcher);

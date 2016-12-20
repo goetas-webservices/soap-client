@@ -1,3 +1,0 @@
-GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign\CanonicalizationMethod:
-    xml_root_name: CanonicalizationMethod
-    xml_root_namespace: 'http://www.w3.org/2000/09/xmldsig#'

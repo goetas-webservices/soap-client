@@ -2,9 +2,19 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
                   xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://www.example.org/test/"
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" 
+                  xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
                   name="test" targetNamespace="http://www.example.org/test/">
     <wsdl:types>
+        <xsd:schema targetNamespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+	      <xsd:include schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
+	    </xsd:schema>
+	
+	    <xsd:schema targetNamespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+	      <xsd:include schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"/>
+	    </xsd:schema>
+    
         <xsd:schema targetNamespace="http://www.example.org/test/">
             <xsd:element name="getSimple">
                 <xsd:complexType>
@@ -197,9 +207,27 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+            <xsd:element name="getWsseHeader">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="in" type="xsd:string"></xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getWsseHeaderResponse">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="out" type="xsd:string"></xsd:element>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
         </xsd:schema>
     </wsdl:types>
 
+	 <wsdl:message name="Sec">
+	    <wsdl:part element="wsse:Security" name="Security"/>
+	  </wsdl:message>
+  
     <wsdl:message name="responseFault">
         <wsdl:part name="responseFaultPart1" element="tns:aFault"></wsdl:part>
         <wsdl:part name="responseFaultPart2" element="tns:bFault"></wsdl:part>
@@ -286,6 +314,12 @@
     <wsdl:message name="noBothRequest"></wsdl:message>
     <wsdl:message name="noBothResponse"></wsdl:message>
 
+    <wsdl:message name="getWsseHeaderRequest">
+    	<wsdl:part name="parameters" element="tns:getWsseHeader"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getWsseHeaderResponse">
+    	<wsdl:part name="parameters" element="tns:getWsseHeaderResponse"></wsdl:part>
+    </wsdl:message>
     <wsdl:portType name="test">
         <wsdl:operation name="getSimple">
             <wsdl:input message="tns:getSimpleRequest"/>
@@ -334,6 +368,10 @@
             <wsdl:input message="tns:noBothRequest"></wsdl:input>
             <wsdl:output message="tns:noBothResponse"></wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="getWsseHeader">
+        	<wsdl:input message="tns:getWsseHeaderRequest"></wsdl:input>
+        	<wsdl:output message="tns:getWsseHeaderResponse"></wsdl:output>
+        </wsdl:operation>
     </wsdl:portType>
 
     <wsdl:portType name="alternativeTPort">
@@ -345,123 +383,152 @@
 
     <wsdl:binding name="testSOAP" type="tns:test">
 
-        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-        <wsdl:operation name="getSimple">
-            <soap:operation soapAction="http://www.example.org/test/getSimple"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getMultiParam">
-            <soap:operation soapAction="http://www.example.org/test/getMultiParam"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getReturnMultiParam">
-            <soap:operation soapAction="http://www.example.org/test/getReturnMultiParam"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="requestHeader">
-            <soap:operation soapAction="http://www.example.org/test/requestHeader"/>
-            <wsdl:input>
-                <soap:header use="literal" part="header" message="tns:requestHeader"/>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="requestHeaders">
-            <soap:operation soapAction="http://www.example.org/test/requestHeaders"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-                <soap:header use="literal" part="header" message="tns:requestHeader">
-                    <soap:headerfault use="literal" part="header" message="tns:requestHeader"/>
-                </soap:header>
-                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="responseHeaderMessages">
-            <soap:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-                <soap:header use="literal" part="header" message="tns:requestHeader"/>
-                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+    	<soap:binding style="document"
+    		transport="http://schemas.xmlsoap.org/soap/http" />
+    	<wsdl:operation name="getSimple">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/getSimple" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="getMultiParam">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/getMultiParam" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="getReturnMultiParam">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/getReturnMultiParam" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="requestHeader">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/requestHeader" />
+    		<wsdl:input>
+    			<soap:header use="literal" part="header"
+    				message="tns:requestHeader" />
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="requestHeaders">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/requestHeaders" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    			<soap:header use="literal" part="header"
+    				message="tns:requestHeader">
+    				<soap:headerfault use="literal" part="header"
+    					message="tns:requestHeader" />
+    			</soap:header>
+    			<soap:header use="literal" part="headerLocal"
+    				message="tns:requestHeader" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="responseHeaderMessages">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/responseHeaderMessages" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    			<soap:header use="literal" part="header"
+    				message="tns:requestHeader" />
+    			<soap:header use="literal" part="headerLocal"
+    				message="tns:requestHeader" />
 
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="responseFault">
-            <soap:operation soapAction="http://www.example.org/test/responseFault"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-            <wsdl:fault name="error">
-                <soap:fault use="literal" name="error"/>
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="responseFaults">
-            <soap:operation soapAction="http://www.example.org/test/responseFaults"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-            <wsdl:fault name="error">
-                <soap:fault use="literal" name="error"/>
-            </wsdl:fault>
-            <wsdl:fault name="error2">
-                <soap:fault use="literal" name="error2"/>
-            </wsdl:fault>
-        </wsdl:operation>
-        <wsdl:operation name="noInput">
-            <soap:operation soapAction="http://www.example.org/test/noInput"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="noOutput">
-            <soap:operation soapAction="http://www.example.org/test/noOutput"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="noBoth">
-            <soap:operation soapAction="http://www.example.org/test/noBoth"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="responseFault">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/responseFault" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    		<wsdl:fault name="error">
+    			<soap:fault use="literal" name="error" />
+    		</wsdl:fault>
+    	</wsdl:operation>
+    	<wsdl:operation name="responseFaults">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/responseFaults" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    		<wsdl:fault name="error">
+    			<soap:fault use="literal" name="error" />
+    		</wsdl:fault>
+    		<wsdl:fault name="error2">
+    			<soap:fault use="literal" name="error2" />
+    		</wsdl:fault>
+    	</wsdl:operation>
+    	<wsdl:operation name="noInput">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/noInput" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="noOutput">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/noOutput" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="noBoth">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/noBoth" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	<wsdl:operation name="getWsseHeader">
+    		<soap:operation
+    			soapAction="http://www.example.org/test/getWsseHeader" />
+    		<wsdl:input>
+    			<soap:body use="literal" />
+    			<soap:header use="literal" part="Security" message="tns:Sec"/>
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
     </wsdl:binding>
 
     <wsdl:binding name="testSOAP12" type="tns:test">
@@ -582,6 +649,19 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        
+        <wsdl:operation name="getWsseHeader">
+    		<soap12:operation
+    			soapAction="http://www.example.org/test/getWsseHeader" />
+    		<wsdl:input>
+    			<soap12:body use="literal" />
+    			<soap12:header use="literal" part="Security" message="tns:Sec"/>
+    		</wsdl:input>
+    		<wsdl:output>
+    			<soap12:body use="literal" />
+    		</wsdl:output>
+    	</wsdl:operation>
+    	
     </wsdl:binding>
 
     <wsdl:binding name="alternativeBinding" type="tns:alternativeTPort">
