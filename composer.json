@@ -28,8 +28,11 @@
 
     "goetas-webservices/wsdl-reader": "^v0.3.1",
 
-    "php-http/guzzle6-adapter": "^1.0",
-    "php-http/message": "^1.0"
+    "ass/xmlsecurity" : "^1.0",
+    "php-http/guzzle6-adapter": "^1.0"
+  },
+  "suggest": {
+    "ass/xmlsecurity" : "Required for WS Security features"
   },
   "autoload": {
     "psr-4": {
