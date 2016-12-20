@@ -45,13 +45,7 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
 
             $converter = $container->getDefinition('goetas_webservices.xsd2php.converter.' . $type);
 
-            $converter->addMethodCall('setOutputAnyAttribute', [$config['any_attribute']]);
-            $converter->addMethodCall('setOutputAnyElement', [$config['any_element']]);
-
             $converterWsdl = $container->getDefinition('goetas_webservices.wsdl2php.converter.' . $type);
-
-            $converterWsdl->addMethodCall('setOutputAnyAttribute', [$config['any_attribute']]);
-            $converterWsdl->addMethodCall('setOutputAnyElement', [$config['any_element']]);
 
             foreach ($config['namespaces'] as $xml => $php) {
                 $converter->addMethodCall('addNamespace', [$xml, self::sanitizePhp($php)]);
