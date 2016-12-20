@@ -4,17 +4,8 @@
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" 
                   xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-                  xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
                   name="test" targetNamespace="http://www.example.org/test/">
     <wsdl:types>
-        <xsd:schema targetNamespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-	      <xsd:include schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/>
-	    </xsd:schema>
-	
-	    <xsd:schema targetNamespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-	      <xsd:include schemaLocation="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"/>
-	    </xsd:schema>
-    
         <xsd:schema targetNamespace="http://www.example.org/test/">
             <xsd:element name="getSimple">
                 <xsd:complexType>
@@ -207,26 +198,8 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="getWsseHeader">
-            	<xsd:complexType>
-            		<xsd:sequence>
-            			<xsd:element name="in" type="xsd:string"></xsd:element>
-            		</xsd:sequence>
-            	</xsd:complexType>
-            </xsd:element>
-            <xsd:element name="getWsseHeaderResponse">
-            	<xsd:complexType>
-            		<xsd:sequence>
-            			<xsd:element name="out" type="xsd:string"></xsd:element>
-            		</xsd:sequence>
-            	</xsd:complexType>
-            </xsd:element>
         </xsd:schema>
     </wsdl:types>
-
-	 <wsdl:message name="Sec">
-	    <wsdl:part element="wsse:Security" name="Security"/>
-	  </wsdl:message>
   
     <wsdl:message name="responseFault">
         <wsdl:part name="responseFaultPart1" element="tns:aFault"></wsdl:part>
@@ -314,12 +287,6 @@
     <wsdl:message name="noBothRequest"></wsdl:message>
     <wsdl:message name="noBothResponse"></wsdl:message>
 
-    <wsdl:message name="getWsseHeaderRequest">
-    	<wsdl:part name="parameters" element="tns:getWsseHeader"></wsdl:part>
-    </wsdl:message>
-    <wsdl:message name="getWsseHeaderResponse">
-    	<wsdl:part name="parameters" element="tns:getWsseHeaderResponse"></wsdl:part>
-    </wsdl:message>
     <wsdl:portType name="test">
         <wsdl:operation name="getSimple">
             <wsdl:input message="tns:getSimpleRequest"/>
@@ -367,10 +334,6 @@
         <wsdl:operation name="noBoth">
             <wsdl:input message="tns:noBothRequest"></wsdl:input>
             <wsdl:output message="tns:noBothResponse"></wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getWsseHeader">
-        	<wsdl:input message="tns:getWsseHeaderRequest"></wsdl:input>
-        	<wsdl:output message="tns:getWsseHeaderResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
 
@@ -518,17 +481,6 @@
     			<soap:body use="literal" />
     		</wsdl:output>
     	</wsdl:operation>
-    	<wsdl:operation name="getWsseHeader">
-    		<soap:operation
-    			soapAction="http://www.example.org/test/getWsseHeader" />
-    		<wsdl:input>
-    			<soap:body use="literal" />
-    			<soap:header use="literal" part="Security" message="tns:Sec"/>
-    		</wsdl:input>
-    		<wsdl:output>
-    			<soap:body use="literal" />
-    		</wsdl:output>
-    	</wsdl:operation>
     </wsdl:binding>
 
     <wsdl:binding name="testSOAP12" type="tns:test">
@@ -649,18 +601,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        
-        <wsdl:operation name="getWsseHeader">
-    		<soap12:operation
-    			soapAction="http://www.example.org/test/getWsseHeader" />
-    		<wsdl:input>
-    			<soap12:body use="literal" />
-    			<soap12:header use="literal" part="Security" message="tns:Sec"/>
-    		</wsdl:input>
-    		<wsdl:output>
-    			<soap12:body use="literal" />
-    		</wsdl:output>
-    	</wsdl:operation>
     	
     </wsdl:binding>
 
