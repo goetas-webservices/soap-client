@@ -430,7 +430,7 @@ class WssSecurityTest extends \PHPUnit_Framework_TestCase
 
         $tags = ['ds:SignatureValue', 'ds:DigestValue', 'xenc:CipherValue', 'ws:BinarySecurityToken', 'ws:Nonce', 'ws:Password'];
         foreach ($tags as $tag) {
-            $xml = preg_replace("~(<$tag.*?>)(.*?)(<\\/$tag>)~", '\1abc\3', $xml);
+            $xml = preg_replace("~(<$tag.*?>)(.+?)(<\\/$tag>)~", '\1abc\3', $xml);
         }
         return $xml;
     }
