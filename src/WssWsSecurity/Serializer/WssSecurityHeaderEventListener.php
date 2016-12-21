@@ -41,7 +41,7 @@ class WssSecurityHeaderEventListener implements EventSubscriberInterface
 
         $envelope = dom_import_simplexml($data);
         $this->filter->filterDom($envelope->ownerDocument);
-
+echo $envelope->ownerDocument->saveXML();
         $newData = simplexml_import_dom($envelope);
         $event->setData($newData);
     }
