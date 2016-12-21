@@ -423,7 +423,7 @@ class WssSecurityTest extends \PHPUnit_Framework_TestCase
         $this->assertXmlStringEqualsXmlString($this->cleanXML($expectedString), $this->cleanXML($xml));
     }
 
-    public function cleanXML($xml)
+    private function cleanXML($xml)
     {
         $xml = preg_replace('~(Id|EncKey|Cert|\#)[a-f0-9\-]+~', 'X', $xml);
         $xml = preg_replace('~\d{4}\-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*?Z~', 'X', $xml);
