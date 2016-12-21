@@ -28,7 +28,10 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 {
     protected static $namespaces = [
-        'http://www.example.org/test/' => "Ex"
+        'http://www.example.org/test/' => "Ex",
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Secext',
+        'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Utility',
+        'http://www.w3.org/2000/09/xmldsig#' => 'GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\XmlSign',
     ];
     /**
      * @var Generator
@@ -102,7 +105,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
     {
         $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
         <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+          <SOAP:Body>
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
             </ns-b3c6b39d:getSimpleResponse>
@@ -124,7 +127,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
     {
         $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
         <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+          <SOAP:Body>
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
             </ns-b3c6b39d:getSimpleResponse>
@@ -155,7 +158,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
     {
         $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
         <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+          <SOAP:Body>
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
             </ns-b3c6b39d:getSimpleResponse>
@@ -174,12 +177,12 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $client->getSimple("foo", new MustUnderstandHeader($mp));
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
-              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
@@ -189,12 +192,12 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
-              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope" SOAP:mustUnderstand="true">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
@@ -250,7 +253,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->responseMock->append(
             new Response(200, ['Content-Type' => 'application/soap+xml'], '
             <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:noInputResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[A]]></out>
                 </ns-b3c6b39d:noInputResponse>
@@ -292,7 +295,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
                 200,
                 ['Content-Type' => 'application/soap+xml'],
                 '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getReturnMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[foo]]></out>
                 </ns-b3c6b39d:getReturnMultiParamResponse>
@@ -313,7 +316,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
@@ -329,7 +332,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
                 200,
                 ['Content-Type' => 'application/soap+xml'],
                 '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getMultiParamResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <out><![CDATA[A]]></out>
                 </ns-b3c6b39d:getMultiParamResponse>
@@ -345,7 +348,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Body>
                 <ns-b3c6b39d:getMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getMultiParam>

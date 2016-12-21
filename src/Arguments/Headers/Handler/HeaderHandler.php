@@ -9,13 +9,9 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
-use Symfony\Component\DependencyInjection\SimpleXMLElement;
 
 class HeaderHandler implements SubscribingHandlerInterface
 {
-    const SOAP = 'http://schemas.xmlsoap.org/soap/envelope/';
-    const SOAP_12 = 'http://www.w3.org/2003/05/soap-envelope';
-
     protected $headerData = [];
 
     public static function getSubscribingMethods()
@@ -67,7 +63,7 @@ class HeaderHandler implements SubscribingHandlerInterface
 
             $metadata = new StaticPropertyMetadata($classMetadata->name, $classMetadata->xmlRootName, $header->getData());
             $metadata->xmlNamespace = $classMetadata->xmlRootNamespace;
-            $metadata->serializedName = $classMetadata->xmlRootName;
+            $metadata->serializedName = $classMetadata->xmlRootName ?: 'header';
 
             $visitor->visitProperty($metadata, $header->getData(), $context);
 
@@ -88,12 +84,7 @@ class HeaderHandler implements SubscribingHandlerInterface
         foreach ($options as $option => $value) {
             if (in_array($option, ['mustUnderstand', 'required', 'role', 'actor'])) {
 
-                if ($currentNode->ownerDocument->documentElement->namespaceURI === self::SOAP_12) {
-                    $envelopeNS = self::SOAP_12;
-                } else {
-                    $envelopeNS = self::SOAP;
-                }
-                $this->setAttributeOnNode($currentNode->lastChild, $option, $value, $envelopeNS);
+                $this->setAttributeOnNode($currentNode->lastChild, $option, $value, $currentNode->ownerDocument->documentElement->namespaceURI);
             }
         }
     }

@@ -33,17 +33,13 @@ Installation
 
 The recommended way to install goetas-webservices / soap-client is using [Composer](https://getcomposer.org/):
 
-Add this packages to your `composer.json` file.
 
 ```
-{
-    "require": {
-        "goetas-webservices/soap-client": "^0.2",
-    },
-    "require-dev": {
-        "goetas-webservices/wsdl2php": "^0.3",
-    },
-}
+composer require goetas-webservices/soap-client
+composer require goetas-webservices/wsdl2php --dev
+
+# to use WS Security
+composer require ass/xmlsecurity
 ```
 
 More dependencies might be needed depending on your PSR-7 and HTTP client preferred implementation.
@@ -65,7 +61,7 @@ Here is an example:
 # config.yml
 
 soap_client:
-  alternative_endpoints:
+  alternative_endpoints: # optional
     MyServiceName:
       MySoapPortName: http://localhost:8080/service
 
@@ -75,7 +71,7 @@ soap_client:
     'TestNs/MyApp': soap/src
   destinations_jms:
     'TestNs/MyApp': soap/metadata
-  aliases:
+  aliases: # optional
     'http://www.example.org/test/':
       MyCustomXSDType:  'MyCustomMappedPHPType'
 
