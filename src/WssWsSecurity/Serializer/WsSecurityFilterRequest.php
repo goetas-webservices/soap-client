@@ -1,9 +1,11 @@
 <?php
 
-namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity;
+namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Serializer;
 
 use ass\XmlSecurity\DSig as XmlSecurityDSig;
 use ass\XmlSecurity\Enc as XmlSecurityEnc;
+use ass\XmlSecurity\Key as XmlSecurityKey;
+use GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Security;
 
 class WsSecurityFilterRequest extends AbstractWsSecurityFilter
 {
@@ -16,6 +18,11 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
      * Web Services Security UsernameToken Profile 1.0
      */
     const NAME_WSS_UTP = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0';
+
+    /**
+     * Web Services Security: SOAP Message Security 1.1 (WS-Security 2004)
+     */
+    const NAME_WSS_SMS_1_1 = 'http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1';
 
     /**
      * Web Services Security X.509 Certificate Token Profile
@@ -235,36 +242,33 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
     /**
      * Modify the given request XML.
      *
-     * @param \DOMDocument $dom
+     * @param \DOMElement $currentNode,
      * @param Security $securityData
      *
      * @return \DOMElement
      */
-    public function filterDom(\DOMDocument $dom, Security $securityData)
+    public function filterDom(\DOMElement $currentNode, Security $securityData)
     {
-        $security = $dom->createElementNS(self::NS_WSS, 'Security');
-
+        $dom = $currentNode->ownerDocument;
         $root = $dom->documentElement;
-        $root->setAttributeNS(
-            'http://www.w3.org/2000/xmlns/', // xmlns namespace URI
-            'xmlns:wssu',
-            self::NS_WSU
+
+        $namespaces = array(
+            'ws' => self::NS_WSS,
+            'wsu' => self::NS_WSU,
+            XmlSecurityDSig::PFX_XMLDSIG => XmlSecurityDSig::NS_XMLDSIG,
+            XmlSecurityEnc::PFX_XMLENC => XmlSecurityEnc::NS_XMLENC,
         );
-        $root->setAttributeNS(
-            'http://www.w3.org/2000/xmlns/', // xmlns namespace URI
-            'xmlns:wsss',
-            self::NS_WSS
-        );
-        $root->setAttributeNS(
-            'http://www.w3.org/2000/xmlns/', // xmlns namespace URI
-            'xmlns:dsig',
-            XmlSecurityDSig::NS_XMLDSIG
-        );
-        $root->setAttributeNS(
-            'http://www.w3.org/2000/xmlns/', // xmlns namespace URI
-            'xmlns:xenc',
-            XmlSecurityEnc::NS_XMLENC
-        );
+
+        foreach ($namespaces as $prefix => $ns) {
+            $root->setAttributeNS(
+                'http://www.w3.org/2000/xmlns/', // xmlns namespace URI
+                'xmlns:'.$prefix,
+                $ns
+            );
+        }
+
+        $security = $dom->createElementNS(self::NS_WSS, $root->lookupPrefix(self::NS_WSS).':Security');
+        $currentNode->parentNode->replaceChild($security, $currentNode);
 
         // init timestamp
         $dt = $this->initialTimestamp ?: new \DateTime('now', new \DateTimeZone('UTC'));
@@ -343,6 +347,7 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
     private function handleUsername(\DOMElement $security, $dt, Security $securityData)
     {
         $dom = $security->ownerDocument;
+
         $usernameToken = $dom->createElementNS(self::NS_WSS, 'UsernameToken');
         $security->appendChild($usernameToken);
 
@@ -383,6 +388,12 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
     private function handleSignature(\DOMElement $security)
     {
         $dom = $security->ownerDocument;
+
+        // this is fundamental for the signature
+        // formatting the dom adds nodes that are not signed
+        $dom->formatOutput = false;
+        $dom->preserveWhiteSpace = true;
+
         $guid = 'CertId-' . self::generateUUID();
         // add token references
         $keyInfo = null;
@@ -390,6 +401,8 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
             $keyInfo = $this->createKeyInfo($dom, $this->tokenReferenceSignature, $guid, $this->userSecurityKey->getPublicKey());
         }
         $nodes = $this->createNodeListForSigning($dom, $security);
+
+
         $signature = XmlSecurityDSig::createSignature($this->userSecurityKey->getPrivateKey(), XmlSecurityDSig::EXC_C14N, $security, null, $keyInfo);
 
         if ((!$prefix = $security->lookupPrefix(self::NS_WSU)) && (!$prefix = $security->ownerDocument->lookupPrefix(self::NS_WSU))) {
@@ -397,7 +410,7 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
         }
 
         $options = array(
-            'id_ns_prefix' => $prefix ?: 'wsu',
+            'id_ns_prefix' => $prefix,
             'id_prefix_ns' => self::NS_WSU,
         );
         foreach ($nodes as $node) {
@@ -413,7 +426,6 @@ class WsSecurityFilterRequest extends AbstractWsSecurityFilter
         $security->insertBefore($binarySecurityToken, $signature);
 
         $binarySecurityToken->setAttributeNs(self::NS_WSU, $prefix.':Id', $guid);
-
 
         return $signature;
     }

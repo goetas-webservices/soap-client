@@ -1,13 +1,14 @@
 <?php
 
-namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity;
+namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Serializer;
 
 use ass\XmlSecurity\DSig as XmlSecurityDSig;
 use ass\XmlSecurity\Enc as XmlSecurityEnc;
+use ass\XmlSecurity\Key as XmlSecurityKey;
+use GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Exception\ClientException;
 
 class WsSecurityFilterResponse extends AbstractWsSecurityFilter
 {
-
     /**
      * Gets the referenced node for the given URI.
      *
@@ -35,7 +36,7 @@ class WsSecurityFilterResponse extends AbstractWsSecurityFilter
      *
      * @return \ass\XmlSecurity\Key|null
      */
-    protected function keyInfoSecurityTokenReferenceResolver(\DOMElement $node, $algorithm)
+    public function keyInfoSecurityTokenReferenceResolver(\DOMElement $node, $algorithm)
     {
         foreach ($node->childNodes as $key) {
             if (self::NS_WSS === $key->namespaceURI) {
@@ -68,6 +69,7 @@ class WsSecurityFilterResponse extends AbstractWsSecurityFilter
         return null;
     }
 
+
     /**
      * Modify the given request XML.
      *
@@ -77,7 +79,6 @@ class WsSecurityFilterResponse extends AbstractWsSecurityFilter
      */
     public function filterDom(\DOMDocument $dom)
     {
-
         // locate security header
         $security = $dom->getElementsByTagNameNS(self::NS_WSS, 'Security')->item(0);
         if (null !== $security) {
@@ -87,9 +88,12 @@ class WsSecurityFilterResponse extends AbstractWsSecurityFilter
             // do we have a reference list in header
             $referenceList = XmlSecurityEnc::locateReferenceList($security);
             // get a list of encrypted nodes
+
             $encryptedNodes = XmlSecurityEnc::locateEncryptedData($dom, $referenceList);
+
             // decrypt them
             if (null !== $encryptedNodes) {
+
                 foreach ($encryptedNodes as $encryptedNode) {
                     XmlSecurityEnc::decryptNode($encryptedNode);
                 }
@@ -100,14 +104,14 @@ class WsSecurityFilterResponse extends AbstractWsSecurityFilter
                 // verify references
                 $options = array(
                     'id_ns_prefix' => 'wsu', // used only for the xpath prefix
-                    'id_prefix_ns' => self::PFX_WSU
+                    'id_prefix_ns' => self::NS_WSU
                 );
                 if (XmlSecurityDSig::verifyReferences($signature, $options) !== true) {
-                    throw new \SoapFault('wsse:FailedCheck', 'The signature or decryption was invalid');
+                    throw new ClientException('The node signature or decryption was invalid');
                 }
                 // verify signature
                 if (XmlSecurityDSig::verifyDocumentSignature($signature) !== true) {
-                    throw new \SoapFault('wsse:FailedCheck', 'The signature or decryption was invalid');
+                    throw new ClientException('The document signature or decryption was invalid');
                 }
             }
 

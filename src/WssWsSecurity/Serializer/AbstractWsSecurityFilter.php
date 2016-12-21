@@ -1,5 +1,7 @@
 <?php
-namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity;
+namespace GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\Serializer;
+
+use GoetasWebservices\SoapServices\SoapClient\WssWsSecurity\SecurityKeyPair;
 
 abstract class AbstractWsSecurityFilter
 {
@@ -34,7 +36,7 @@ abstract class AbstractWsSecurityFilter
      *
      * @return void
      */
-    public function setServiceSecurityKeyObject(SecurityKeyPair $serviceSecurityKey)
+    public function setServiceSecurityKeyObject(SecurityKeyPair $serviceSecurityKey = null)
     {
         $this->serviceSecurityKey = $serviceSecurityKey;
     }
@@ -46,7 +48,7 @@ abstract class AbstractWsSecurityFilter
      *
      * @return void
      */
-    public function setUserSecurityKeyObject(SecurityKeyPair $userSecurityKey)
+    public function setUserSecurityKeyObject(SecurityKeyPair $userSecurityKey = null)
     {
         $this->userSecurityKey = $userSecurityKey;
     }
