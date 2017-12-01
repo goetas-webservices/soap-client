@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

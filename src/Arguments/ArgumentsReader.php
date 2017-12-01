@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments;
 
 use Doctrine\Instantiator\Instantiator;

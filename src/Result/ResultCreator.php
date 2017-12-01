@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\Result;
 
 use JMS\Serializer\Serializer;

@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\Metadata\Generator;
 
 use Doctrine\Common\Inflector\Inflector;

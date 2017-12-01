@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\Metadata\Loader;
 
 interface MetadataLoaderInterface

@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration;
 
 use Doctrine\Common\Inflector\Inflector;
