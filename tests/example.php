@@ -26,7 +26,7 @@ $metadata = $container->get('goetas_webservices.soap_client.metadata_reader');
 $responseMock = new MockHandler();
 $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
-          <SOAP:Body xmlns:ns-b3c6b39d="http://www.example.org/test/">
+          <SOAP:Body>
             <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
               <out><![CDATA[A]]></out>
             </ns-b3c6b39d:getSimpleResponse>
