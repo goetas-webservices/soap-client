@@ -179,7 +179,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
-              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
@@ -194,7 +194,7 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
-              <SOAP:Header xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/" SOAP:mustUnderstand="true">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>

@@ -1,4 +1,5 @@
 <?php
+
 namespace GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler;
 
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
@@ -65,9 +66,11 @@ class HeaderHandler implements SubscribingHandlerInterface
              */
             $classMetadata = $factory->getMetadataForClass(get_class($header->getData()));
 
-            $metadata = new StaticPropertyMetadata($classMetadata->name, $classMetadata->xmlRootName, $header->getData());
+            $name = ($pos = strpos($classMetadata->xmlRootName, ':')) !== false ? substr($classMetadata->xmlRootName, $pos + 1) : $classMetadata->xmlRootName;
+
+            $metadata = new StaticPropertyMetadata($classMetadata->name, $name, $header->getData());
             $metadata->xmlNamespace = $classMetadata->xmlRootNamespace;
-            $metadata->serializedName = $classMetadata->xmlRootName;
+            $metadata->serializedName = $name;
 
             $visitor->visitProperty($metadata, $header->getData(), $context);
 
