@@ -51,6 +51,7 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
                     $converter->addMethodCall('addAliasMapType', [$xml, $type, self::sanitizePhp($php)]);
                 }
             }
+            $converter->addMethodCall('addAliasMapType', ['http://schemas.xmlsoap.org/soap/encoding/', '*', 'mixed']);
         }
 
 
