@@ -46,7 +46,6 @@
 
         <service id="goetas_webservices.xsd2php.schema_reader" public="true"
                  class="GoetasWebservices\XML\XSDReader\SchemaReader">
-            <argument type="service" id="logger"/>
         </service>
 
         <service synthetic="true" public="false" id="goetas_webservices.xsd2php.naming_convention"/>

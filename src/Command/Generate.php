@@ -19,8 +19,8 @@ class Generate extends Command
         $this->setDescription("Convert create all the necessary PHP classes for a SOAP client");
         $this->setDefinition([
             new InputArgument('config', InputArgument::REQUIRED, 'Config file location'),
-            new InputArgument('dest-dir', InputArgument::REQUIRED, 'Config file location'),
-            new InputOption('dest-class', null, InputOption::VALUE_REQUIRED, 'Config file location'),
+            new InputArgument('dest-dir', InputArgument::REQUIRED, 'Container files destination directory'),
+            new InputOption('dest-class', null, InputOption::VALUE_REQUIRED, 'Container class file destination directory'),
         ]);
     }
 
