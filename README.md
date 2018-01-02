@@ -164,7 +164,7 @@ $container = new SoapClientContainer();
 // create a JMS serializer instance
 $serializer = SoapContainerBuilder::createSerializerBuilderFromContainer($container)->build();
 // get the metadata from the container
-$metadata = $container->get('goetas.soap_client.metadata_reader');
+$metadata = $container->get('goetas_webservices.soap_client.metadata_reader');
 
 $factory = new ClientFactory($metadata, $serializer);
 
