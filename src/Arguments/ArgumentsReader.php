@@ -80,7 +80,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
 
         foreach ($classMetadata2->propertyMetadata as $propertyMetadata2) {
             if (!count($args)) {
-                throw new \Exception("Not enough arguments provided. Can't fina a parameter to set " . $propertyMetadata2->name);
+                throw new \Exception("Not enough arguments provided. Can't find a parameter to set " . $propertyMetadata2->name);
             }
             $value = array_shift($args);
             $propertyMetadata2->setValue($instance2, $value);
