@@ -178,6 +178,11 @@ class SoapContainerBuilder
      */
     public static function createSerializerBuilder(array $jmsMetadata, callable $callback = null)
     {
+        $jmsMetadata = array_merge([
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12' => __DIR__ . '/../Resources/metadata/jms12',
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope' => __DIR__ . '/../Resources/metadata/jms',
+        ], $jmsMetadata);
+
         $serializerBuilder = SerializerBuilder::create();
         $serializerBuilder->configureHandlers(function (HandlerRegistryInterface $handler) use ($callback, $serializerBuilder) {
             $serializerBuilder->addDefaultHandlers();
