@@ -183,3 +183,69 @@ Please note the `@var $client \GlobalWeather\SoapStubs\WeatherSoap`. The generat
 that allows modern IDE to give you type hinting for parameters and return data.
 
 This allows you to develop faster your client.
+
+
+### Using the client with dynamic endpoints
+
+Suppose that you have same Webservice with different endpoints (ex. for each customer).
+You want to change endpoint dynamical and you don't want to write each new endpoint in your config and run the generator again.
+
+You can use alternative_endpoints to set an enviromnt variable in Symfony style but without the '%' and with a custom service as prefix.
+
+Here is an example:
+
+```yml
+# config.yml
+
+soap_client:
+  alternative_endpoints:
+    MyServiceName:
+      MySoapPortName: 'env(simplevar:ENDPOINT_SERVICE1_PORT1)'
+```
+
+So, SoapClientContainer resolve at runtime the endpoint for the specific service and port.
+
+The trick to set the parameter in SoapClientContainer is to create a new Symfony Container that have the custom service, `simplevar` in this case, that implements `EnvVarProcessorInterface`, and set this new container as `container.env_var_processors_locator` to SoapClientContainer
+
+Example of simple class that implements `EnvVarProcessorInterface`
+
+```php
+# SimpleEnvVarProcessor.php
+
+use Symfony\Component\DependencyInjection\EnvVarProcessorInterface;
+
+class SimpleEnvVarProcessor implements EnvVarProcessorInterface
+{
+
+    private $map = [];
+
+    public function __construct(array $map)
+    {
+        $this->map = $map;
+    }
+
+    public function getEnv($prefix, $name, \Closure $getEnv)
+    {
+        return $this->map[$name];
+    }
+
+    public static function getProvidedTypes()
+    {
+        return [];
+    }
+}
+```
+
+At the end, to use the SoapContainer
+
+
+```php
+$container = new SoapClientContainer();
+
+$containerThatResolveTheParameters = new \Symfony\Component\DependencyInjection\Container();
+$containerThatResolveTheParameters->set('simpleenvar', new SimpleEnvVarProcessor([
+    'ENDPOINT_SERVICE1_PORT1' => 'http://localhost:8080/service'
+]));
+
+$container->set('container.env_var_processors_locator', $containerThatResolveTheParameters);
+```
