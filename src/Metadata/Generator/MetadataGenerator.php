@@ -49,6 +49,9 @@ class MetadataGenerator implements MetadataGeneratorInterface
 
     public function addAlternativeEndpoint($service, $port, $endPoint)
     {
+        if (0 === strpos($endPoint, 'env(') && ')' === substr($endPoint, -1) && 'env()' !== $endPoint) {
+            $endPoint = "%$endPoint%";
+        }
         $this->alternativeEndpoints[$service][$port] = $endPoint;
     }
 
