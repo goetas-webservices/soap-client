@@ -183,3 +183,77 @@ Please note the `@var $client \GlobalWeather\SoapStubs\WeatherSoap`. The generat
 that allows modern IDE to give you type hinting for parameters and return data.
 
 This allows you to develop faster your client.
+
+### Using the client with dynamic endpoints
+
+Suppose that you have same Webservice with different endpoints (ex. for each customer), 
+so you want to change endpoints dynamically and you don't want to write each new endpoint in your config 
+and run the generator for each customer.
+
+With the help of Symfony's `EnvVarProcessorInterface`, 
+you can use `alternative_endpoints` to set dynamically the webservice endpoints.
+
+Here is an example:
+
+```yml
+# config.yml
+soap_client:
+  alternative_endpoints:
+    MyServiceName:
+      MySoapPortName: 'env(custom_vars:ENDPOINT_SERVICE1_PORT1)'
+```
+
+So, `SoapClientContainer` will resolve at runtime the endpoint for the specific service and port and the value will be 
+taken from the `ENDPOINT_SERVICE1_PORT1` variable.
+
+Example of simple class that implements `EnvVarProcessorInterface`, responsible for providing a values for 
+our custom endpoint locations (as `custom_vars:ENDPOINT_SERVICE1_PORT1`).
+
+```php
+// SimpleEnvVarProcessor.php used for the `env(custom_vars:*)` variables resolution
+
+use Symfony\Component\DependencyInjection\EnvVarProcessorInterface;
+
+class SimpleEnvVarProcessor implements EnvVarProcessorInterface
+{
+    private $map = [];
+
+    public function __construct(array $map)
+    {
+        $this->map = $map;
+    }
+
+    public function getEnv($prefix, $name, \Closure $getEnv)
+    {
+        return $this->map[$name];
+    }
+
+    public static function getProvidedTypes()
+    {
+        return [];
+    }
+}
+```
+
+At the end, to use the `SoapClientContainer`:
+
+
+```php
+// instantiate our variable processor and set the values for our custom variables
+$varProcessor = new SimpleEnvVarProcessor([
+    'ENDPOINT_SERVICE1_PORT1' => 'http://localhost:8080/service'
+]);
+
+// create an empty symfony container and set into it the $varProcessor namined as 'custom_vars'
+$varContainer = new \Symfony\Component\DependencyInjection\Container(); 
+$varContainer->set('custom_vars', $varProcessor);
+
+// create the soap container and use $varContainer "env()" style variables resolution
+$container = new SoapClientContainer();
+$container->set('container.env_var_processors_locator', $varContainer);
+
+// now $container can be used as explained in the section "Using the client"
+```
+
+In this way the endpoint for the `MyServiceName`.`MySoapPortName` will be dynamically resolved to `http://localhost:8080/service`
+even if the WSDL stats something else.
