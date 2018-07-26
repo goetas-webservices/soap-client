@@ -34,7 +34,4 @@ class FaultBody
         $this->fault = $fault;
         return $this;
     }
-
-
 }
-
