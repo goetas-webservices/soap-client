@@ -15,7 +15,7 @@ class FaultHandler implements SubscribingHandlerInterface
             array(
                 'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
                 'format' => 'xml',
-                'type' => 'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault\FaultDetail',
+                'type' => 'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault',
                 'method' => 'deserializeFaultDetail'
             ),
         );

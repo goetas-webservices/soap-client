@@ -2,9 +2,11 @@
 
 namespace GoetasWebservices\SoapServices\SoapClient\Exception;
 
-use GoetasWebservices\SoapServices\SoapClient\SoapEnvelope\Parts\Fault;
-
 class FaultException extends ServerException
 {
 
+    public function getFault()
+    {
+        throw new \LogicException('This method must be override');
+    }
 }

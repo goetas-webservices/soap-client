@@ -15,14 +15,14 @@ class Fault implements FaultMessageInterface
 {
 
     /**
-     * @property \GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\FaultBody $body
+     * @property FaultBody $body
      */
     private $body = null;
 
     /**
      * Gets as body
      *
-     * @return \GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\FaultBody
+     * @return FaultBody
      */
     public function getBody()
     {
@@ -32,10 +32,10 @@ class Fault implements FaultMessageInterface
     /**
      * Sets a new body
      *
-     * @param \GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\FaultBody $body
+     * @param FaultBody $body
      * @return self
      */
-    public function setBody(\GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\FaultBody $body)
+    public function setBody(FaultBody $body)
     {
         $this->body = $body;
         return $this;
@@ -54,6 +54,4 @@ class Fault implements FaultMessageInterface
         }
         return new Fault12Exception($this->getBody()->getFault(), $response, $request, $e);
     }
-
 }
-
