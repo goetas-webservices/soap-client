@@ -30,7 +30,7 @@ GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault:
             serialized_name: Detail
             xml_element:
                 namespace: 'http://www.w3.org/2003/05/soap-envelope'
-            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault\FaultDetail
+            type: string
         role:
             expose: true
             access_type: public_method
