@@ -31,4 +31,4 @@ GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault:
                 getter: getDetail
                 setter: setDetail
             serialized_name: detail
-            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault\FaultDetail
+            type: string
