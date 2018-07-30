@@ -3,6 +3,7 @@ namespace GoetasWebservices\SoapServices\SoapClient\Builder;
 
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\SoapClientExtension;
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\CleanupPass;
+use GoetasWebservices\SoapServices\SoapClient\Envelope\Handler\FaultHandler;
 use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\BaseTypesHandler;
 use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\XmlSchemaDateHandler;
 use JMS\Serializer\SerializerBuilder;
@@ -202,6 +203,7 @@ class SoapContainerBuilder
             $serializerBuilder->addDefaultHandlers();
             $handler->registerSubscribingHandler(new BaseTypesHandler()); // XMLSchema List handling
             $handler->registerSubscribingHandler(new XmlSchemaDateHandler()); // XMLSchema date handling
+            $handler->registerSubscribingHandler(new FaultHandler());
             if ($callback) {
                 call_user_func($callback, $handler);
             }
