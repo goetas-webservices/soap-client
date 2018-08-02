@@ -137,8 +137,8 @@ class Client
             return $serviceDefinition['operations'][$functionName];
         }
 
-        foreach ($serviceDefinition['operations'] as $opName => $operation) {
-            if (strtolower($functionName) == strtolower($opName)) {
+        foreach ($serviceDefinition['operations'] as $operation) {
+            if (strtolower($functionName) == strtolower($operation['method'])) {
                 return $operation;
             }
         }
