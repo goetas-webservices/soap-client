@@ -257,3 +257,11 @@ $container->set('container.env_var_processors_locator', $varContainer);
 
 In this way the endpoint for the `MyServiceName`.`MySoapPortName` will be dynamically resolved to `http://localhost:8080/service`
 even if the WSDL stats something else.
+
+## Note 
+
+The code in this project is provided under the 
+[MIT](https://opensource.org/licenses/MIT) license. 
+For professional support 
+contact [goetas@gmail.com](mailto:goetas@gmail.com) 
+or visit [https://www.goetas.com](https://www.goetas.com)
