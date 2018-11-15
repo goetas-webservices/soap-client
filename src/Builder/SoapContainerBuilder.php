@@ -177,14 +177,21 @@ class SoapContainerBuilder
     }
 
     /**
-     *
      * @param ContainerInterface $container
      * @param callable $callback
+     * @param string $metadataDirPrefix
      * @return SerializerBuilder
      */
-    public static function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null)
+    public static function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null, $metadataDirPrefix = null)
     {
         $destinations = $container->getParameter('goetas_webservices.soap_client.config')['destinations_jms'];
+
+        if ($metadataDirPrefix !== null) {
+            $destinations = array_map(function ($dir) use ($metadataDirPrefix) {
+                return rtrim($metadataDirPrefix, '/') . '/' . $dir;
+            }, $destinations);
+        }
+
         return self::createSerializerBuilder($destinations, $callback);
     }
 
