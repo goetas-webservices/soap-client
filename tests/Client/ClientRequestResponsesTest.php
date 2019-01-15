@@ -34,10 +34,6 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
      * @var Generator
      */
     protected static $generator;
-    /**
-     * @var Server
-     */
-    protected static $server;
 
     /**
      * @var \GuzzleHttp\Handler\MockHandler

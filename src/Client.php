@@ -17,6 +17,7 @@ use GoetasWebservices\SoapServices\SoapEnvelope;
 use Http\Client\Exception\HttpException;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\Serializer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
@@ -76,7 +77,14 @@ class Client
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
         $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
-        $xmlMessage = $this->serializer->serialize($message, 'xml');
+        $xmlMessage = $this->serializer->serialize(
+            $message,
+            'xml',
+            (new SerializationContext())
+                ->setAttribute('soapAction', $soapOperation['action'])
+                ->setAttribute('soapEndpoint', $this->serviceDefinition['endpoint'])
+        );
+
         $headers = $this->buildHeaders($soapOperation);
         $this->requestMessage = $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
 

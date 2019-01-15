@@ -21,7 +21,10 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
+use JMS\Serializer\Context;
+use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
+use JMS\Serializer\Serializer;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -35,16 +38,19 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
      */
     protected static $generator;
     /**
-     * @var Server
-     */
-    protected static $server;
-
-    /**
      * @var \GuzzleHttp\Handler\MockHandler
      */
     protected $responseMock;
 
     protected $requestResponseStack = [];
+    /**
+     * @var ClientFactory
+     */
+    private $factory;
+    /**
+     * @var Serializer
+     */
+    private $serializer;
 
     public static function setUpBeforeClass()
     {
@@ -64,7 +70,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $generator = new Generator(self::$namespaces);
         $ref = new \ReflectionClass(Fault::class);
         $headerHandler = new HeaderHandler();
-        $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
+        $this->serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
             $h->registerSubscribingHandler($headerHandler);
             $h->registerSubscribingHandler(new FaultHandler());
         }, [
@@ -91,7 +97,7 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $metadataLoader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
 
 
-        $this->factory = new ClientFactory($metadataLoader, $serializer);
+        $this->factory = new ClientFactory($metadataLoader, $this->serializer);
         $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
         $this->factory->setHeaderHandler($headerHandler);
     }
@@ -463,4 +469,33 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testSerializerContextParametersAreAdded()
+    {
+        // Override serializer with a custom handler for asserting the context parameters
+        $generator = new Generator(self::$namespaces);
+        $ref = new \ReflectionClass(Fault::class);
+        $serializer = $this->serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) {
+            $h->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'Ex\SoapEnvelope12\Messages\GetSimpleInput', 'xml',
+                function($visitor, \Ex\SoapEnvelope12\Messages\GetSimpleInput $obj, array $type, Context $context) {
+
+                    self::assertEquals('http://www.example.org/12', $context->getAttribute('soapEndpoint'));
+                    self::assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapAction'));
+
+                    throw new SerializerHandlerAssertionsWereExecuted('Stop serialization, test has finished');
+                });
+        }, [
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
+            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
+        ]);
+
+        $this->factory->setSerializer($serializer);
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
+
+        // Assert that subscribing handler with assertions was executed
+        self::expectException(SerializerHandlerAssertionsWereExecuted::class);
+
+        $client->getSimple('foo');
+    }
 }
+
+class SerializerHandlerAssertionsWereExecuted extends \Exception {}
