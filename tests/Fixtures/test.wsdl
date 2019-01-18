@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://www.example.org/test/"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+                  name="test" targetNamespace="http://www.example.org/test/">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.example.org/test/">
+            <xsd:element name="getSimple">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getSimpleResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getMultiParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getMultiParamResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getReturnMultiParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getReturnMultiParamResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getType">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getTypeResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:complexType name="customComplex">
+                <xsd:sequence>
+                    <xsd:element name="item" type="xsd:string"></xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:element name="requestHeader">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="requestHeaderResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="requestHeaders">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="requestHeadersResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="authHeader">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="user" type="xsd:string"></xsd:element>
+                        <xsd:element name="pwd" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="authHeaderLocal">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="local" type="xsd:boolean"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="doSomething">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="doSomethingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseHeaderMessages">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseHeaderMessagesResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseFaultResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseFaults">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="responseFaultsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="aFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fault" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="bFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="fault" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="noInputResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="out" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="noOutput">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="in" type="xsd:string"></xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="responseFault">
+        <wsdl:part name="responseFaultPart1" element="tns:aFault"></wsdl:part>
+        <wsdl:part name="responseFaultPart2" element="tns:bFault"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseFault2">
+        <wsdl:part name="responseFaultPart2" element="tns:bFault"></wsdl:part>
+    </wsdl:message>
+
+    <wsdl:message name="requestHeader">
+        <wsdl:part element="tns:authHeader" name="header"/>
+        <wsdl:part element="tns:authHeaderLocal" name="headerLocal"/>
+    </wsdl:message>
+    <wsdl:message name="getSimpleRequest">
+        <wsdl:part element="tns:getSimple" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="getSimpleResponse">
+        <wsdl:part element="tns:getSimpleResponse" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="getMultiParamRequest">
+        <wsdl:part name="parameters" element="tns:getMultiParam"></wsdl:part>
+        <wsdl:part name="other-param" type="xsd:string"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getMultiParamResponse">
+        <wsdl:part name="parameters" element="tns:getMultiParamResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getReturnMultiParamRequest">
+        <wsdl:part name="parameters" element="tns:getReturnMultiParam"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getReturnMultiParamResponse">
+        <wsdl:part name="parameters" element="tns:getReturnMultiParamResponse"></wsdl:part>
+        <wsdl:part name="other-param" type="xsd:string"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getTypeRequest">
+        <wsdl:part name="parameters" type="tns:customComplex"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getTypeResponse">
+        <wsdl:part name="parameters" element="tns:getTypeResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="requestHeaderRequest">
+        <wsdl:part name="parameters" element="tns:requestHeader"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="requestHeaderResponse">
+        <wsdl:part name="parameters" element="tns:requestHeaderResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="requestHeadersRequest">
+        <wsdl:part name="parameters" element="tns:requestHeaders"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="requestHeadersResponse">
+        <wsdl:part name="parameters" element="tns:requestHeadersResponse"></wsdl:part>
+    </wsdl:message>
+
+    <wsdl:message name="doSomethingRequest">
+        <wsdl:part name="parameters" element="tns:doSomething"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="doSomethingResponse">
+        <wsdl:part name="parameters" element="tns:doSomethingResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseHeaderMessagesRequest">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessages"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseHeaderMessagesResponse">
+        <wsdl:part name="parameters" element="tns:responseHeaderMessagesResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseFaultRequest">
+        <wsdl:part name="parameters" element="tns:responseFault"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseFaultResponse">
+        <wsdl:part name="parameters" element="tns:responseFaultResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseFaultsRequest">
+        <wsdl:part name="parameters" element="tns:responseFaults"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="responseFaultsResponse">
+        <wsdl:part name="parameters" element="tns:responseFaultsResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="noInputRequest"></wsdl:message>
+    <wsdl:message name="noInputResponse">
+        <wsdl:part name="parameters" element="tns:noInputResponse"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="noOutputRequest">
+        <wsdl:part name="parameters" element="tns:noOutput"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="noOutputResponse"></wsdl:message>
+    <wsdl:message name="noBothRequest"></wsdl:message>
+    <wsdl:message name="noBothResponse"></wsdl:message>
+
+    <wsdl:portType name="test">
+        <wsdl:operation name="getSimple">
+            <wsdl:input message="tns:getSimpleRequest"/>
+            <wsdl:output message="tns:getSimpleResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getMultiParam">
+            <wsdl:input message="tns:getMultiParamRequest"></wsdl:input>
+            <wsdl:output message="tns:getMultiParamResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getReturnMultiParam">
+            <wsdl:input message="tns:getReturnMultiParamRequest"></wsdl:input>
+            <wsdl:output message="tns:getReturnMultiParamResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeader">
+            <wsdl:input message="tns:requestHeaderRequest"></wsdl:input>
+            <wsdl:output message="tns:requestHeaderResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeaders">
+            <wsdl:input message="tns:requestHeadersRequest"></wsdl:input>
+            <wsdl:output message="tns:requestHeadersResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseHeaderMessages">
+            <wsdl:input message="tns:responseHeaderMessagesRequest"></wsdl:input>
+            <wsdl:output message="tns:responseHeaderMessagesResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseFault">
+            <wsdl:input message="tns:responseFaultRequest"></wsdl:input>
+            <wsdl:output message="tns:responseFaultResponse"></wsdl:output>
+            <wsdl:fault name="error" message="tns:responseFault"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="responseFaults">
+            <wsdl:input message="tns:responseFaultsRequest"></wsdl:input>
+            <wsdl:output message="tns:responseFaultsResponse"></wsdl:output>
+            <wsdl:fault name="error" message="tns:responseFault"></wsdl:fault>
+            <wsdl:fault name="error2" message="tns:responseFault2"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="noInput">
+            <wsdl:input message="tns:noInputRequest"></wsdl:input>
+            <wsdl:output message="tns:noInputResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noOutput">
+            <wsdl:input message="tns:noOutputRequest"></wsdl:input>
+            <wsdl:output message="tns:noOutputResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noBoth">
+            <wsdl:input message="tns:noBothRequest"></wsdl:input>
+            <wsdl:output message="tns:noBothResponse"></wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:portType name="alternativeTPort">
+        <wsdl:operation name="doSomething">
+            <wsdl:input message="tns:doSomethingRequest"></wsdl:input>
+            <wsdl:output message="tns:doSomethingResponse"></wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="testSOAP" type="tns:test">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getSimple">
+            <soap:operation soapAction="http://www.example.org/test/getSimple"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getMultiParam">
+            <soap:operation soapAction="http://www.example.org/test/getMultiParam"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getReturnMultiParam">
+            <soap:operation soapAction="http://www.example.org/test/getReturnMultiParam"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeader">
+            <soap:operation soapAction="http://www.example.org/test/requestHeader"/>
+            <wsdl:input>
+                <soap:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeaders">
+            <soap:operation soapAction="http://www.example.org/test/requestHeaders"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header use="literal" part="header" message="tns:requestHeader">
+                    <soap:headerfault use="literal" part="header" message="tns:requestHeader"/>
+                </soap:header>
+                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseFault">
+            <soap:operation soapAction="http://www.example.org/test/responseFault"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap:fault use="literal" name="error"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="responseFaults">
+            <soap:operation soapAction="http://www.example.org/test/responseFaults"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap:fault use="literal" name="error"/>
+            </wsdl:fault>
+            <wsdl:fault name="error2">
+                <soap:fault use="literal" name="error2"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="noInput">
+            <soap:operation soapAction="http://www.example.org/test/noInput"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noOutput">
+            <soap:operation soapAction="http://www.example.org/test/noOutput"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noBoth">
+            <soap:operation soapAction="http://www.example.org/test/noBoth"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="testSOAP12" type="tns:test">
+
+        <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getSimple">
+            <soap12:operation soapAction="http://www.example.org/test/getSimple"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getMultiParam">
+            <soap12:operation soapAction="http://www.example.org/test/getMultiParam"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getReturnMultiParam">
+            <soap12:operation soapAction="http://www.example.org/test/getReturnMultiParam"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeader">
+            <soap12:operation soapAction="http://www.example.org/test/requestHeader"/>
+            <wsdl:input>
+                <soap12:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="requestHeaders">
+            <soap12:operation soapAction="http://www.example.org/test/requestHeaders"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+                <soap12:header use="literal" part="header" message="tns:requestHeader">
+                    <soap12:headerfault use="literal" part="header" message="tns:requestHeader"/>
+                </soap12:header>
+                <soap12:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseHeaderMessages">
+            <soap12:operation soapAction="http://www.example.org/test/responseHeaderMessages"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+                <soap12:header use="literal" part="header" message="tns:requestHeader"/>
+                <soap12:header use="literal" part="headerLocal" message="tns:requestHeader"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="responseFault">
+            <soap12:operation soapAction="http://www.example.org/test/responseFault"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap12:fault use="literal" name="error"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="responseFaults">
+            <soap12:operation soapAction="http://www.example.org/test/responseFaults"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="error">
+                <soap12:fault use="literal" name="error"/>
+            </wsdl:fault>
+            <wsdl:fault name="error2">
+                <soap12:fault use="literal" name="error2"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="noInput">
+            <soap12:operation soapAction="http://www.example.org/test/noInput"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noOutput">
+            <soap12:operation soapAction="http://www.example.org/test/noOutput"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="noBoth">
+            <soap12:operation soapAction="http://www.example.org/test/noBoth"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="alternativeBinding" type="tns:alternativeTPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="doSomething">
+            <soap:operation soapAction="http://www.example.org/test/doSomething"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="http" type="tns:alternativeTPort">
+        <http:binding verb="GET"/>
+        <wsdl:operation name="doSomething">
+            <http:operation location="/doSomething"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="test">
+        <wsdl:port binding="tns:testSOAP" name="testSOAP">
+            <soap:address location="http://www.example.org/"/>
+        </wsdl:port>
+        <wsdl:port binding="tns:testSOAP12" name="testSOAP12">
+            <soap12:address location="http://www.example.org/12"/>
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="alternativeTest">
+        <wsdl:port name="aPort" binding="tns:alternativeBinding">
+            <soap:address location="http://www.example.org/"/>
+        </wsdl:port>
+        <wsdl:port name="otherPort" binding="tns:alternativeBinding">
+            <soap:address location="http://www.example.org/"/>
+        </wsdl:port>
+        <wsdl:port name="http" binding="tns:http">
+            <http:address location="http://www.example.org/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

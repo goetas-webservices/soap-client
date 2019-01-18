@@ -1,0 +1,53 @@
+GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault:
+    xml_root_namespace: 'http://www.w3.org/2003/05/soap-envelope'
+    properties:
+        code:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getCode
+                setter: setCode
+            serialized_name: Code
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\FaultCode
+        reason:
+            expose: true
+            serialized_name: Reason
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: array<string>
+            xml_list:
+                inline: false
+                entry_name: Text
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+        detail:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getDetail
+                setter: setDetail
+            serialized_name: Detail
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault\FaultDetail
+        role:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getRole
+                setter: setRole
+            serialized_name: Role
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: string
+        node:
+            expose: true
+            access_type: public_method
+            accessor:
+                getter: getNode
+                setter: setNode
+            serialized_name: Node
+            xml_element:
+                namespace: 'http://www.w3.org/2003/05/soap-envelope'
+            type: string

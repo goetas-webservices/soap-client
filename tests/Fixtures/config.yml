@@ -1,0 +1,19 @@
+soap_client:
+  metadata:
+    'tests/Fixtures/test.wsdl': ~
+  alternative_endpoints:
+    service:
+      port: xxx
+  namespaces:
+    'http://www.example.org/test/': 'TestNs'
+  destinations_php:
+    'TestNs': soap/src
+  destinations_jms:
+    'TestNs\SoapEnvelope12': soap/metadata/soap-env-12
+    'TestNs\SoapEnvelope': soap/metadata/soap-env-11
+    'TestNs\SoapParts': soap/metadata/soap-parts
+    'TestNs': soap/metadata
+  aliases:
+    'http://www.example.org/test/':
+      responseHeaderMessagesResponse:  'HeaderResponse'
+
