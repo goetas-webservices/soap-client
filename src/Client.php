@@ -50,6 +50,7 @@ class Client
      * @var ArgumentsReaderInterface
      */
     private $argumentsReader;
+
     /**
      * @var RequestInterface
      */
