@@ -61,7 +61,6 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-
         $generator = new Generator(self::$namespaces);
         $ref = new \ReflectionClass(Fault::class);
         $headerHandler = new HeaderHandler();
@@ -95,7 +94,62 @@ class Client12RequestResponsesTest extends \PHPUnit_Framework_TestCase
         $this->factory = new ClientFactory($metadataLoader, $serializer);
         $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
         $this->factory->setHeaderHandler($headerHandler);
+    }
 
+    public function testGetLastRequestMessage()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
+          <SOAP:Body>
+            <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <out><![CDATA[A]]></out>
+            </ns-b3c6b39d:getSimpleResponse>
+          </SOAP:Body>
+        </SOAP:Envelope>');
+
+        $this->responseMock->append($httpResponse);
+
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
+        $this->assertNull($client->__getLastRequestMessage());
+
+        /**
+         * @var $response \Ex\GetSimpleResponse
+         */
+        $response = $client->getSimple("foo");
+        $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $client->__getLastRequestMessage());
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
+              <SOAP:Body>
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
+            </SOAP:Envelope>',
+            (string)$client->__getLastRequestMessage()->getBody());
+    }
+
+    public function testGetLastResponseMessage()
+    {
+        $httpResponse = new Response(200, ['Content-Type' => 'application/soap+xml'], '
+        <SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
+          <SOAP:Body>
+            <ns-b3c6b39d:getSimpleResponse xmlns:ns-b3c6b39d="http://www.example.org/test/">
+              <out><![CDATA[A]]></out>
+            </ns-b3c6b39d:getSimpleResponse>
+          </SOAP:Body>
+        </SOAP:Envelope>');
+
+        $this->responseMock->append($httpResponse);
+
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP12');
+        $this->assertNull($client->__getLastResponseMessage());
+
+        /**
+         * @var $response \Ex\GetSimpleResponse
+         */
+        $response = $client->getSimple("foo");
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $client->__getLastResponseMessage());
+        $this->assertSame($httpResponse, $client->__getLastResponseMessage());
     }
 
     public function testGetSimple()

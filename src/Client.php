@@ -19,6 +19,7 @@ use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use JMS\Serializer\Serializer;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
 
 class Client
 {
@@ -50,6 +51,14 @@ class Client
      */
     private $argumentsReader;
 
+    /**
+     * @var RequestInterface
+     */
+    private $requestMessage;
+    /**
+     * @var ResponseInterface
+     */
+    private $responseMessage;
 
     public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, HeaderHandler $headerHandler)
     {
@@ -69,10 +78,10 @@ class Client
 
         $xmlMessage = $this->serializer->serialize($message, 'xml');
         $headers = $this->buildHeaders($soapOperation);
-        $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
+        $this->requestMessage = $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
 
         try {
-            $response = $this->client->sendRequest($request);
+            $this->responseMessage = $response = $this->client->sendRequest($request);
             if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
                 throw new UnexpectedFormatException(
                     $response,
@@ -112,7 +121,22 @@ class Client
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
     }
 
-    public function findFaultClass(ResponseInterface $response)
+    /**
+     * @return RequestInterface|null
+     */
+    public function __getLastRequestMessage()
+    {
+        return $this->requestMessage;
+    }
+    /**
+     * @return ResponseInterface|null
+     */
+    public function __getLastResponseMessage()
+    {
+        return $this->responseMessage;
+    }
+
+    protected function findFaultClass(ResponseInterface $response)
     {
         if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') === 0) {
             return Fault12::class;
