@@ -19,10 +19,10 @@ use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\Serializer;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
-class Client
+class Client implements ClientInterface
 {
     /**
      * @var Serializer
@@ -45,12 +45,12 @@ class Client
     /**
      * @var ResultCreatorInterface
      */
-    private $resultCreator;
+    protected $resultCreator;
 
     /**
      * @var ArgumentsReaderInterface
      */
-    private $argumentsReader;
+    protected $argumentsReader;
 
     /**
      * @var RequestInterface
@@ -65,7 +65,6 @@ class Client
     {
         $this->serviceDefinition = $serviceDefinition;
         $this->serializer = $serializer;
-
         $this->client = $client;
         $this->messageFactory = $messageFactory;
         $this->argumentsReader = new ArgumentsReader($this->serializer, $headerHandler);
@@ -75,55 +74,18 @@ class Client
     public function __call($functionName, array $args)
     {
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
-        $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
-        $xmlMessage = $this->serializer->serialize(
-            $message,
-            'xml',
-            (new SerializationContext())
-                ->setAttribute('soapAction', $soapOperation['action'])
-                ->setAttribute('soapEndpoint', $this->serviceDefinition['endpoint'])
-        );
-
-        $headers = $this->buildHeaders($soapOperation);
-        $this->requestMessage = $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
+        $request = $this->buildRequest($args, $soapOperation);
 
         try {
-            $this->responseMessage = $response = $this->client->sendRequest($request);
-            if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
-                throw new UnexpectedFormatException(
-                    $response,
-                    $request,
-                    "Unexpected content type '" . $response->getHeaderLine('Content-Type') . "'"
-                );
-            }
-
-            // fast return if no return is expected
-            if (!count($soapOperation['output']['parts'])) {
-                return null;
-            }
-
-            $body = (string)$response->getBody();
-
-            $faultClass = $this->findFaultClass($response);
-
-            if (strpos($body, ':Fault>') !== false) { // some server returns a fault with 200 OK HTTP
-                $fault = $this->serializer->deserialize($body, $faultClass, 'xml');
-                throw $fault->createException($response, $request);
-            }
-
-            $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
+            $response = $this->sendRequest($request);
+            $response = $this->handleResponse($response, $soapOperation, $request);
         } catch (HttpException $e) {
-            if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'xml') !== false) {
-                $faultClass = $this->findFaultClass($e->getResponse());
-                $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), $faultClass, 'xml');
-                throw $fault->createException($e->getResponse(), $e->getRequest(), $e);
+            $response = $e->getResponse();
+            if (strpos($response->getHeaderLine('Content-Type'), 'xml') !== false) {
+                $this->handleFaultIfPresent($response, $e->getRequest(), $e);
             } else {
-                throw new ServerException(
-                    $e->getResponse(),
-                    $e->getRequest(),
-                    $e
-                );
+                throw new ServerException($response, $e->getRequest(), $e);
             }
         }
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
@@ -144,7 +106,7 @@ class Client
         return $this->responseMessage;
     }
 
-    protected function findFaultClass(ResponseInterface $response)
+    public function findFaultClass(ResponseInterface $response)
     {
         if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') !== false) {
             return Fault12::class;
@@ -175,5 +137,95 @@ class Client
             }
         }
         throw new ClientException("Can not find an operation to run $functionName service call");
+    }
+
+    protected function handleFaultIfPresent(ResponseInterface $response, RequestInterface $request, HttpException $e = null)
+    {
+        $faultClass = $this->findFaultClass($response);
+        $body = (string) $response->getBody();
+
+        if ((strpos($body, ':Fault>') !== false) || (null !== $e)) { // some server returns a fault with 200 OK HTTP
+            $fault = $this->serializer->deserialize($body, $faultClass, 'xml');
+            throw $fault->createException($response, $request, $e);
+        }
+    }
+
+    protected function buildRequest(array $args, $soapOperation)
+    {
+        $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
+        $xmlMessage = $this->serializeMessage($soapOperation, $message);
+        $headers = $this->buildHeaders($soapOperation);
+
+        $this->requestMessage = $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
+
+        return $request;
+    }
+
+    /**
+     * @param $soapOperation
+     * @param $message
+     * @return string
+     */
+    protected function serializeMessage($soapOperation, $message)
+    {
+        $xmlMessage = $this->serializer->serialize(
+            $message,
+            'xml',
+            (new SerializationContext())
+                ->setAttribute('soapAction', $soapOperation['action'])
+                ->setAttribute('soapEndpoint', $this->serviceDefinition['endpoint'])
+        );
+
+        return $xmlMessage;
+    }
+
+    /**
+     * @param $body
+     * @param $soapOperation
+     * @return array|\JMS\Serializer\scalar|mixed|object
+     */
+    protected function deserializeResponse($body, $soapOperation)
+    {
+        $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
+
+        return $response;
+    }
+
+    /**
+     * @param $body
+     * @param $soapOperation
+     * @return array|\JMS\Serializer\scalar|mixed|object
+     */
+    protected function handleResponse(ResponseInterface $response, $soapOperation, RequestInterface $request)
+    {
+        if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
+            throw new UnexpectedFormatException(
+                $response,
+                $request,
+                "Unexpected content type '" . $response->getHeaderLine('Content-Type') . "'"
+            );
+        }
+
+        // fast return if no return is expected
+        if (!count($soapOperation['output']['parts'])) {
+            return null;
+        }
+
+        $body = (string)$response->getBody();
+        $this->handleFaultIfPresent($response, $request);
+        $response = $this->deserializeResponse($body, $soapOperation);
+
+        return $response;
+    }
+
+    /**
+     * @param $request
+     * @return ResponseInterface
+     */
+    protected function sendRequest($request)
+    {
+        $this->responseMessage = $response = $this->client->sendRequest($request);
+
+        return $response;
     }
 }
