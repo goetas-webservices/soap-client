@@ -6,18 +6,18 @@ cache:
     - $HOME/.composer/cache
 git:
     depth: 1
-php:
-  - 5.6
-  - 7.0
 
 matrix:
   include:
-    - php: 5.6
-      env: COMPOSER_FLAGS='--prefer-lowest --prefer-stable'
+    - php: '5.6'
+      env:
+        - COVERAGE=true
+        - COMPOSER_FLAGS='--prefer-lowest --prefer-stable'
+    - php: '7.0'
 
 before_script:
   - echo "xdebug.max_nesting_level=1000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - if [[ $TRAVIS_PHP_VERSION = '5.6' ]]; then PHPUNIT_FLAGS="--coverage-clover=coverage.clover"; else PHPUNIT_FLAGS=""; fi
+  - if [ $COVERAGE ]; then PHPUNIT_FLAGS="--coverage-clover=coverage.clover"; else PHPUNIT_FLAGS=""; fi
   - if [[ $TRAVIS_PHP_VERSION != '5.6' ]]; then phpenv config-rm xdebug.ini; fi  
   - composer self-update
   - composer update $COMPOSER_FLAGS
@@ -29,5 +29,5 @@ script:
 
 after_success:
   - wget https://scrutinizer-ci.com/ocular.phar
-  - if [[ $TRAVIS_PHP_VERSION = '5.6' ]] ; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
+  - if [ $COVERAGE ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
   
