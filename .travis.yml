@@ -14,6 +14,9 @@ matrix:
         - COVERAGE=true
         - COMPOSER_FLAGS='--prefer-lowest --prefer-stable'
     - php: '7.0'
+    - php: '7.1'
+    - php: '7.2'
+    - php: '7.3'
 
 before_script:
   - echo "xdebug.max_nesting_level=1000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
