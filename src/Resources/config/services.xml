@@ -96,7 +96,7 @@
         <service id="goetas_webservices.wsdl2php.soap_reader" class="GoetasWebservices\XML\SOAPReader\SoapReader"/>
 
         <service id="goetas_webservices.wsdl2php.wsdl_reader"
-                 class="GoetasWebservices\XML\WSDLReader\DefinitionsReader">
+                 class="GoetasWebservices\XML\WSDLReader\DefinitionsReader" public="true">
             <argument id="goetas_webservices.xsd2php.schema_reader" type="service"/>
             <argument id="goetas_webservices.wsdl2php.event_dispatcher" type="service"/>
         </service>
