@@ -69,7 +69,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
 
         $propertyName = key($input['parts']);
         $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
-        if ($args[0] instanceof $propertyMetadata->type['name']) {
+        if (isset($args[0]) && $args[0] instanceof $propertyMetadata->type['name']) {
             $propertyMetadata->setValue($body, reset($args));
             return $envelope;
         }
