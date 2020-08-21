@@ -6,7 +6,10 @@ use Doctrine\Instantiator\Instantiator;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderPlaceholder;
 use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
+use GoetasWebservices\SoapServices\SoapClient\SerializerUtils;
 use JMS\Serializer\Serializer;
+use Metadata\MetadataFactoryInterface;
+use Metadata\PropertyMetadata;
 
 class ArgumentsReader implements ArgumentsReaderInterface
 {
@@ -23,6 +26,12 @@ class ArgumentsReader implements ArgumentsReaderInterface
     {
         $this->serializer = $serializer;
         $this->headerHandler = $headerHandler;
+    }
+
+    private function setPropertyValue($propertyMetadata, $object, $value) {
+        $reflectionProperty = new \ReflectionProperty($propertyMetadata->class, $propertyMetadata->name);
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($object, $value);
     }
 
     /**
@@ -51,7 +60,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
 
         $body = $instantiator->instantiate($input['part_fqcn']);
         $envelope->setBody($body);
-        $factory = $this->serializer->getMetadataFactory();
+        $factory = SerializerUtils::getMetadataFactory($this->serializer);
         $classMetadata = $factory->getMetadataForClass($input['part_fqcn']);
 
         if (count($input['parts']) > 1) {
@@ -62,7 +71,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
 
             foreach ($input['parts'] as $paramName => $elementName) {
                 $propertyMetadata = $classMetadata->propertyMetadata[$paramName];
-                $propertyMetadata->setValue($body, array_shift($args));
+                $this->setPropertyValue($propertyMetadata, $body, array_shift($args));
             }
             return $envelope;
         }
@@ -70,20 +79,20 @@ class ArgumentsReader implements ArgumentsReaderInterface
         $propertyName = key($input['parts']);
         $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
         if (isset($args[0]) && $args[0] instanceof $propertyMetadata->type['name']) {
-            $propertyMetadata->setValue($body, reset($args));
+            $this->setPropertyValue($propertyMetadata, $body, reset($args));
             return $envelope;
         }
 
         $instance2 = $instantiator->instantiate($propertyMetadata->type['name']);
         $classMetadata2 = $factory->getMetadataForClass($propertyMetadata->type['name']);
-        $propertyMetadata->setValue($body, $instance2);
+        $this->setPropertyValue($propertyMetadata, $body, $instance2);
 
         foreach ($classMetadata2->propertyMetadata as $propertyMetadata2) {
             if (!count($args)) {
                 throw new \Exception("Not enough arguments provided. Can't find a parameter to set " . $propertyMetadata2->name);
             }
             $value = array_shift($args);
-            $propertyMetadata2->setValue($instance2, $value);
+            $this->setPropertyValue($propertyMetadata2, $instance2, $value);
         }
         return $envelope;
     }
