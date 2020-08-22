@@ -77,5 +77,7 @@ class Generate extends Command
         $classDefinitions = $clientStubGenerator->generate($portTypes);
         $classWriter = $debugContainer->get('goetas_webservices.xsd2php.class_writer.php');
         $classWriter->write($classDefinitions);
+
+        return 0;
     }
 }
