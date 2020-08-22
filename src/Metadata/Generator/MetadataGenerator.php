@@ -102,10 +102,17 @@ class MetadataGenerator implements MetadataGeneratorInterface
             'version' => $service->getVersion(),
             'name' => $soapOperation->getOperation()->getName(),
             'method' => Inflector::camelize($soapOperation->getOperation()->getName()),
-            'input' => $this->generateInOut($soapOperation, $soapOperation->getInput(), $soapOperation->getOperation()->getPortTypeOperation()->getInput(), 'Input', $service),
-            'output' => $this->generateInOut($soapOperation, $soapOperation->getOutput(), $soapOperation->getOperation()->getPortTypeOperation()->getOutput(), 'Output', $service),
-            'fault' => []
+            'fault' => [],
+            'input' => false,
+            'output' => false,
         ];
+
+        if ($soapOperation->getInput()) {
+            $operation['input'] = $this->generateInOut($soapOperation, $soapOperation->getInput(), $soapOperation->getOperation()->getPortTypeOperation()->getInput(), 'Input', $service);
+        }
+        if ($soapOperation->getOutput()) {
+            $operation['output'] = $this->generateInOut($soapOperation, $soapOperation->getOutput(), $soapOperation->getOperation()->getPortTypeOperation()->getOutput(), 'Output', $service);
+        }
 
         /**
          * @var $fault \GoetasWebservices\XML\SOAPReader\Soap\Fault

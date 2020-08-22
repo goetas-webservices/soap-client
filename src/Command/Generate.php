@@ -3,6 +3,8 @@
 namespace GoetasWebservices\SoapServices\SoapClient\Command;
 
 use GoetasWebservices\SoapServices\SoapClient\Builder\SoapContainerBuilder;
+use GoetasWebservices\XML\XSDReader\SchemaReader;
+use GoetasWebservices\Xsd\XsdToPhp\AbstractConverter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,6 +44,12 @@ class Generate extends Command
         //$debugContainer->set('logger', $logger);
 
         $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
+
+        /**
+         * @var $schemaReader SchemaReader
+         */
+        $schemaReader = $debugContainer->get('goetas_webservices.xsd2php.schema_reader');
+        $schemaReader->addKnownSchemaLocation('http://schemas.xmlsoap.org/soap/encoding/', __DIR__ .'/../Resources/schemas/soap-enc.xsd');
 
         $schemas = [];
         $portTypes = [];
