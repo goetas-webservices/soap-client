@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:example:local"
+           attributeFormDefault="unqualified" elementFormDefault="unqualified"
+           targetNamespace="urn:example:local">
+    <xs:element name="element1" type="tns:type1"/>
+    <xs:element name="element2">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="data" type="tns:type2"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="type1">
+        <xs:sequence>
+            <xs:element minOccurs="0" ref="tns:element2"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="type2">
+        <xs:sequence>
+            <xs:element name="Id" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
