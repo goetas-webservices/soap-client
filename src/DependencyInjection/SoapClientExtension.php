@@ -4,6 +4,7 @@ namespace GoetasWebservices\SoapServices\SoapClient\DependencyInjection;
 
 use Psr\Log\NullLogger;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -78,8 +79,10 @@ class SoapClientExtension extends Extension implements PrependExtensionInterface
         $forProduction = !!$container->getParameter('goetas_webservices.soap_client.metadata');
 
         $readerName = 'goetas_webservices.soap_client.metadata_loader.' . ($forProduction ? 'array' : 'dev');
-        $container->setAlias('goetas_webservices.soap_client.metadata_reader', $readerName);
-
+        $alias = $container->setAlias('goetas_webservices.soap_client.metadata_reader', $readerName);
+        if ($alias instanceof Alias) {
+            $alias->setPublic(true);
+        }
     }
 
     protected static function sanitizePhp($ns)
