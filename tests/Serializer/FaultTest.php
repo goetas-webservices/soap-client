@@ -9,15 +9,16 @@ use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\F
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
 use JMS\Serializer\Serializer;
+use PHPUnit\Framework\TestCase;
 
-class FaultTest extends \PHPUnit_Framework_TestCase
+class FaultTest extends TestCase
 {
     /**
      * @var Serializer
      */
     protected $serializer;
 
-    public function setUp()
+    public function setUp(): void
     {
 
         $generator = new Generator([]);

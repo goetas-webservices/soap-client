@@ -2,3 +2,4 @@
 /vendor
 composer.lock
 soap
+/.phpunit.result.cache
