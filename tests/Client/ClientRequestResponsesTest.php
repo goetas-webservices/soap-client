@@ -22,10 +22,11 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
+class ClientRequestResponsesTest extends TestCase
 {
     protected static $namespaces = [
         'http://www.example.org/test/' => "Ex"
@@ -46,20 +47,20 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
 
     protected $requestResponseStack = [];
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$generator = new Generator(self::$namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
         self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl']);
         self::$generator->registerAutoloader();
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         self::$generator->unRegisterAutoloader();
         //self::$generator->cleanDirectories();
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $generator = new Generator(self::$namespaces);
         $ref = new \ReflectionClass(Fault::class);
@@ -394,12 +395,12 @@ class ClientRequestResponsesTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Exception
      * @dataProvider getErrorResponses
      * @param ResponseInterface $response
      */
     public function testGetSimpleError(ResponseInterface $response)
     {
+        $this->expectException(\Exception::class);
         $this->responseMock->append($response);
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
         $client->getSimple("foo");

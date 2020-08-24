@@ -3,8 +3,9 @@
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Stub;
 
 use GoetasWebservices\SoapServices\SoapClient\Builder\SoapContainerBuilder;
+use PHPUnit\Framework\TestCase;
 
-class StubGeneratorTest extends \PHPUnit_Framework_TestCase
+class StubGeneratorTest extends TestCase
 {
     public function testDI()
     {

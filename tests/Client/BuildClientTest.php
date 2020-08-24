@@ -8,17 +8,19 @@ use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
+use GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class BuildClientTest extends \PHPUnit_Framework_TestCase
+class BuildClientTest extends TestCase
 {
     /**
      * @var ClientFactory
      */
     protected $factory;
 
-    public function setUp()
+    public function setUp(): void
     {
         $namespaces = [
             'http://www.example.org/test/' => "Ex"
@@ -40,30 +42,30 @@ class BuildClientTest extends \PHPUnit_Framework_TestCase
 
     public function testBuildServer()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+        $this->assertNotNull($client);
     }
 
     public function testGetService()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP');
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP');
+        $this->assertNotNull($client);
     }
 
-    /**
-     * @expectedException  \GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException
-     * @expectedExceptionMessage The port named XXX can not be found
-     */
     public function testGetWrongPort()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'XXX');
+        $this->expectException(PortNotFoundException::class);
+        $this->expectExceptionMessage("The port named XXX can not be found");
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'XXX');
+        $this->assertNotNull($client);
     }
 
-    /**
-     * @expectedException  \GoetasWebservices\XML\WSDLReader\Exception\PortNotFoundException
-     * @expectedExceptionMessage The port named testSOAP can not be found
-     */
     public function testGetWrongService()
     {
-        $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP', 'alternativeTest');
+        $this->expectException(PortNotFoundException::class);
+        $this->expectExceptionMessage("The port named testSOAP can not be found");
+        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP', 'alternativeTest');
+        $this->assertNotNull($client);
     }
 
 }
