@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -7,7 +9,12 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    public function getConfigTreeBuilder()
+    /**
+     * Generates the configuration tree builder.
+     *
+     * @return TreeBuilder The tree builder
+     */
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('soap_client');
@@ -76,6 +83,7 @@ class Configuration implements ConfigurationInterface
             ->prototype('scalar')->end()
             ->end()
             ->end();
+
         return $treeBuilder;
     }
 }

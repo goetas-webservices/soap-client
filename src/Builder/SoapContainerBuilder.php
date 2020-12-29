@@ -1,20 +1,23 @@
 <?php
+
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Builder;
 
-use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\SoapClientExtension;
+use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Handler\FaultHandler;
+use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\Compiler\CleanupPass;
-use GoetasWebservices\SoapServices\SoapClient\Envelope\Handler\FaultHandler;
+use GoetasWebservices\SoapServices\SoapClient\DependencyInjection\SoapClientExtension;
 use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\BaseTypesHandler;
 use GoetasWebservices\Xsd\XsdToPhpRuntime\Jms\Handler\XmlSchemaDateHandler;
-use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
-use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -22,56 +25,62 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class SoapContainerBuilder
 {
-
+    /**
+     * @var string
+     */
     private $className = 'SoapClientContainer';
-
+    /**
+     * @var string
+     */
     private $classNs = 'SoapServicesStub';
-
+    /**
+     * @var string
+     */
     protected $configFile = 'config.yml';
-
+    /**
+     * @var string[]
+     */
     protected $extensions = [];
-
+    /**
+     * @var string[]
+     */
     protected $compilerPasses = [];
 
+    /**
+     * @var string
+     */
     protected static $metadataForSoapEnvelope = [
-        'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12' => __DIR__ . '/../Resources/metadata/jms12',
-        'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope' => __DIR__ . '/../Resources/metadata/jms'
+        'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12' => __DIR__ . '/../Resources/metadata/jms12',
+        'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope' => __DIR__ . '/../Resources/metadata/jms',
     ];
 
-    /**
-     *
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct($configFile = null, LoggerInterface $logger = null)
+    public function __construct(?string $configFile = null)
     {
-        $this->logger = $logger;
         $this->setConfigFile($configFile);
         $this->addExtension(new SoapClientExtension());
         $this->addCompilerPass(new CleanupPass());
     }
 
-    public function setConfigFile($configFile)
+    public function setConfigFile(string $configFile): void
     {
         $this->configFile = $configFile;
     }
 
-    protected function addExtension(ExtensionInterface $extension)
+    protected function addExtension(ExtensionInterface $extension): void
     {
         $this->extensions[] = $extension;
     }
 
-    protected function addCompilerPass(CompilerPassInterface $pass)
+    protected function addCompilerPass(CompilerPassInterface $pass): void
     {
         $this->compilerPasses[] = $pass;
     }
 
-    public function setContainerClassName($fqcn)
+    public function setContainerClassName(string $fqcn): void
     {
         $fqcn = strtr($fqcn, [
             '.' => '\\',
-            '/' => '\\'
+            '/' => '\\',
         ]);
         $pos = strrpos($fqcn, '\\');
         $this->className = substr($fqcn, $pos + 1);
@@ -79,11 +88,9 @@ class SoapContainerBuilder
     }
 
     /**
-     *
      * @param array $metadata
-     * @return ContainerBuilder
      */
-    protected function getContainerBuilder(array $metadata = array())
+    protected function getContainerBuilder(array $metadata = []): ContainerBuilder
     {
         $container = new ContainerBuilder();
 
@@ -96,10 +103,10 @@ class SoapContainerBuilder
         }
 
         $locator = new FileLocator('.');
-        $loaders = array(
+        $loaders = [
             new YamlFileLoader($container, $locator),
-            new XmlFileLoader($container, $locator)
-        );
+            new XmlFileLoader($container, $locator),
+        ];
         $delegatingLoader = new DelegatingLoader(new LoaderResolver($loaders));
         $delegatingLoader->load($this->configFile);
 
@@ -112,11 +119,9 @@ class SoapContainerBuilder
     }
 
     /**
-     *
-     * @param ContainerInterface $debugContainer
      * @return array
      */
-    protected function fetchMetadata(ContainerInterface $debugContainer)
+    protected function fetchMetadata(ContainerInterface $debugContainer): array
     {
         $metadataReader = $debugContainer->get('goetas_webservices.soap_client.metadata_loader.dev');
         $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
@@ -128,45 +133,37 @@ class SoapContainerBuilder
         return $metadata;
     }
 
-    public function getDebugContainer()
+    public function getDebugContainer(): ContainerBuilder
     {
         return $this->getContainerBuilder();
     }
 
-    /**
-     *
-     * @return ContainerInterface
-     */
-    public function getProdContainer()
+    public function getProdContainer(): ContainerInterface
     {
-        $ref = new \ReflectionClass("{$this->classNs}\\{$this->className}");
+        $ref = new \ReflectionClass(sprintf('%s\\%s', $this->classNs, $this->className));
+
         return $ref->newInstance();
     }
 
-    /**
-     *
-     * @param
-     *            $dir
-     * @param ContainerInterface $debugContainer
-     */
-    public function dumpContainerForProd($dir, ContainerInterface $debugContainer)
+    public function dumpContainerForProd(string $dir, ContainerInterface $debugContainer): void
     {
         $metadata = $this->fetchMetadata($debugContainer);
 
         if (! $metadata) {
-            throw new \Exception("Empty metadata can not be used for production");
+            throw new \Exception('Empty metadata can not be used for production');
         }
+
         $forProdContainer = $this->getContainerBuilder($metadata);
         $this->dump($forProdContainer, $dir);
     }
 
-    private function dump(ContainerBuilder $container, $dir)
+    private function dump(ContainerBuilder $container, string $dir): void
     {
         $dumper = new PhpDumper($container);
         $options = [
             'debug' => false,
             'class' => $this->className,
-            'namespace' => $this->classNs
+            'namespace' => $this->classNs,
         ];
 
         if (! is_dir($dir)) {
@@ -176,18 +173,12 @@ class SoapContainerBuilder
         file_put_contents($dir . '/' . $this->className . '.php', $dumper->dump($options));
     }
 
-    /**
-     * @param ContainerInterface $container
-     * @param callable $callback
-     * @param string $metadataDirPrefix
-     * @return SerializerBuilder
-     */
-    public static function createSerializerBuilderFromContainer(ContainerInterface $container, callable $callback = null, $metadataDirPrefix = null)
+    public static function createSerializerBuilderFromContainer(ContainerInterface $container, ?callable $callback = null, ?string $metadataDirPrefix = null): SerializerBuilder
     {
         $destinations = $container->getParameter('goetas_webservices.soap_client.config')['destinations_jms'];
 
-        if ($metadataDirPrefix !== null) {
-            $destinations = array_map(function ($dir) use ($metadataDirPrefix) {
+        if (null !== $metadataDirPrefix) {
+            $destinations = array_map(static function ($dir) use ($metadataDirPrefix) {
                 return rtrim($metadataDirPrefix, '/') . '/' . $dir;
             }, $destinations);
         }
@@ -196,21 +187,19 @@ class SoapContainerBuilder
     }
 
     /**
-     *
      * @param array $jmsMetadata
-     * @param callable $callback
-     * @return SerializerBuilder
      */
-    public static function createSerializerBuilder(array $jmsMetadata, callable $callback = null)
+    public static function createSerializerBuilder(array $jmsMetadata, ?callable $callback = null): SerializerBuilder
     {
         $jmsMetadata = array_merge(self::getMetadataForSoapEnvelope(), $jmsMetadata);
 
         $serializerBuilder = SerializerBuilder::create();
-        $serializerBuilder->configureHandlers(function (HandlerRegistryInterface $handler) use ($callback, $serializerBuilder) {
+        $serializerBuilder->configureHandlers(static function (HandlerRegistryInterface $handler) use ($callback, $serializerBuilder): void {
             $serializerBuilder->addDefaultHandlers();
             $handler->registerSubscribingHandler(new BaseTypesHandler()); // XMLSchema List handling
             $handler->registerSubscribingHandler(new XmlSchemaDateHandler()); // XMLSchema date handling
             $handler->registerSubscribingHandler(new FaultHandler());
+            $handler->registerSubscribingHandler(new HeaderHandler());
             if ($callback) {
                 call_user_func($callback, $handler);
             }
@@ -219,14 +208,14 @@ class SoapContainerBuilder
         foreach ($jmsMetadata as $php => $dir) {
             $serializerBuilder->addMetadataDir($dir, $php);
         }
+
         return $serializerBuilder;
     }
 
     /**
-     *
      * @return string[]
      */
-    public static function getMetadataForSoapEnvelope()
+    public static function getMetadataForSoapEnvelope(): array
     {
         return self::$metadataForSoapEnvelope;
     }

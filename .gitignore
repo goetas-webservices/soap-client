@@ -3,3 +3,6 @@
 composer.lock
 soap
 /.phpunit.result.cache
+tmp
+.phpcs-cache
+config.yml

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Example;
 
 /**
@@ -51,14 +54,15 @@ $factory->setHttpClient(new GuzzleAdapter($guzzle));
  */
 $client = $factory->getClient('tests/Fixtures/test.wsdl');
 
-$out = $client->getSimple("bar");
+$out = $client->getSimple('bar');
 
 if (!($out instanceof GetSimpleResponse)) {
     echo "\$out is not instanceof GetSimpleResponse\n";
     exit(-128);
 }
-$request = (string)$requestResponseStack[0]['request']->getBody();
-if (strpos($request, '<in><![CDATA[bar]]></in>') === false || strpos($request, ':getSimple ') === false) {
+
+$request = (string) $requestResponseStack[0]['request']->getBody();
+if (false === strpos($request, '<in><![CDATA[bar]]></in>') || false === strpos($request, ':getSimple ')) {
     echo "Wrong request\n";
     exit(-128);
 }

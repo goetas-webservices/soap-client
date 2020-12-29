@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Result;
 
 interface ResultCreatorInterface
 {
-    public function prepareResult($object, array $output);
+    /**
+     * @return mixed
+     */
+    public function prepareResult(object $object, array $output);
 }

@@ -1,45 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient;
 
-use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReader;
-use GoetasWebservices\SoapServices\SoapClient\Arguments\ArgumentsReaderInterface;
-use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Messages\Fault as Fault11;
-use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Messages\Fault as Fault12;
+use GoetasWebservices\SoapServices\Metadata\Arguments\ArgumentsReader;
+use GoetasWebservices\SoapServices\Metadata\Arguments\ArgumentsReaderInterface;
+use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\HeaderBag;
+use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope\Messages\Fault as Fault11;
+use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12\Messages\Fault as Fault12;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
-use GoetasWebservices\SoapServices\SoapClient\Exception\ServerException;
-use GoetasWebservices\SoapServices\SoapClient\Exception\SoapException;
+use GoetasWebservices\SoapServices\SoapClient\Exception\Fault11Exception;
+use GoetasWebservices\SoapServices\SoapClient\Exception\Fault12Exception;
+use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\UnexpectedFormatException;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreator;
 use GoetasWebservices\SoapServices\SoapClient\Result\ResultCreatorInterface;
-use GoetasWebservices\SoapServices\SoapEnvelope;
-use Http\Client\Exception\HttpException;
-use Http\Client\HttpClient;
-use Http\Message\MessageFactory;
-use JMS\Serializer\Serializer;
-use Psr\Http\Message\ResponseInterface;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 class Client
 {
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     protected $serializer;
     /**
      * @var array
      */
     protected $serviceDefinition;
+
     /**
-     * @var HttpClient
+     * @var ClientInterface
      */
     protected $client;
 
     /**
-     * @var MessageFactory
+     * @var RequestFactoryInterface
      */
     protected $messageFactory;
+
+
+    /**
+     * @var StreamFactoryInterface
+     */
+    protected $streamFactory;
+
 
     /**
      * @var ResultCreatorInterface
@@ -52,120 +64,198 @@ class Client
     private $argumentsReader;
 
     /**
+     * @var bool
+     */
+    private $debug = false;
+
+    /**
+     * Debug
+     *
      * @var RequestInterface
      */
     private $requestMessage;
+
     /**
+     * Debug
+     *
      * @var ResponseInterface
      */
     private $responseMessage;
 
-    public function __construct(array $serviceDefinition, Serializer $serializer, MessageFactory $messageFactory, HttpClient $client, HeaderHandler $headerHandler)
+    public function __construct(array $serviceDefinition, SerializerInterface $serializer, RequestFactoryInterface $messageFactory, StreamFactoryInterface $streamFactory, ClientInterface $client)
     {
         $this->serviceDefinition = $serviceDefinition;
         $this->serializer = $serializer;
 
         $this->client = $client;
         $this->messageFactory = $messageFactory;
-        $this->argumentsReader = new ArgumentsReader($this->serializer, $headerHandler);
+        $this->streamFactory = $streamFactory;
+        $this->argumentsReader = new ArgumentsReader($this->serializer);
         $this->resultCreator = new ResultCreator($this->serializer, !empty($serviceDefinition['unwrap']));
     }
 
-    public function __call($functionName, array $args)
+    public function setDebug(bool $debug): void
+    {
+        $this->debug = $debug;
+    }
+
+    /**
+     * @param array $args
+     *
+     * @return mixed
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingReturnTypeHint
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.UselessReturnAnnotation
+     */
+    public function __call(string $functionName, array $args)
     {
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
         $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
-        $xmlMessage = $this->serializer->serialize($message, 'xml');
-        $headers = $this->buildHeaders($soapOperation);
-        $this->requestMessage = $request = $this->messageFactory->createRequest('POST', $this->serviceDefinition['endpoint'], $headers, $xmlMessage);
+        $bag = new HeaderBag();
+        $context = SerializationContext::create()->setAttribute('header_bag', $bag);
+        $xmlMessage = $this->serializer->serialize($message, 'xml', $context);
 
-        try {
-            $this->responseMessage = $response = $this->client->sendRequest($request);
-            if (strpos($response->getHeaderLine('Content-Type'), 'xml') === false) {
-                throw new UnexpectedFormatException(
-                    $response,
-                    $request,
-                    "Unexpected content type '" . $response->getHeaderLine('Content-Type') . "'"
-                );
-            }
+        $requestMessage = $this->createRequestMessage($xmlMessage, $soapOperation);
 
-            // fast return if no return is expected
-            if (!count($soapOperation['output']['parts'])) {
-                return null;
-            }
+        $responseMessage = $this->client->sendRequest($requestMessage);
 
-            $body = (string)$response->getBody();
-
-            $faultClass = $this->findFaultClass($response);
-
-            if (strpos($body, ':Fault>') !== false) { // some server returns a fault with 200 OK HTTP
-                $fault = $this->serializer->deserialize($body, $faultClass, 'xml');
-                throw $fault->createException($response, $request);
-            }
-
-            $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml');
-        } catch (HttpException $e) {
-            if (strpos($e->getResponse()->getHeaderLine('Content-Type'), 'xml') !== false) {
-                $faultClass = $this->findFaultClass($e->getResponse());
-                $fault = $this->serializer->deserialize((string)$e->getResponse()->getBody(), $faultClass, 'xml');
-                throw $fault->createException($e->getResponse(), $e->getRequest(), $e);
-            } else {
-                throw new ServerException(
-                    $e->getResponse(),
-                    $e->getRequest(),
-                    $e
-                );
-            }
+        if ($this->debug) {
+            $this->responseMessage = $responseMessage;
         }
+
+        $this->assertValidResponse($responseMessage, $requestMessage);
+
+        // fast return if no return is expected
+        // @todo but we should still check for headers...
+        if (!count($soapOperation['output']['parts'])) {
+            return null;
+        }
+
+        if (200 !== $responseMessage->getStatusCode()) {
+            throw $this->createFaultException($responseMessage, $requestMessage);
+        }
+
+        $body = (string) $responseMessage->getBody();
+        if (false !== strpos($body, ':Fault>')) { // some server returns a fault with 200 OK HTTP
+            throw $this->createFaultException($responseMessage, $requestMessage);
+        }
+
+        $bag = new HeaderBag();
+        $context = DeserializationContext::create()->setAttribute('headers_bag', $bag);
+        $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml', $context);
+
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
     }
 
+    public function assertValidResponse(ResponseInterface $responseMessage, RequestInterface $requestMessage, ?\Throwable $previous = null): void
+    {
+        if (false === strpos($responseMessage->getHeaderLine('Content-Type'), 'xml')) {
+            throw new UnexpectedFormatException(
+                $responseMessage,
+                $requestMessage,
+                "Unexpected content type '" . $responseMessage->getHeaderLine('Content-Type') . "'",
+                $previous
+            );
+        }
+
+        $body = (string) $responseMessage->getBody();
+
+        if (false === strpos($body, 'http://schemas.xmlsoap.org/soap/envelope/') && false === strpos($body, 'http://www.w3.org/2003/05/soap-envelope')) {
+            throw new UnexpectedFormatException(
+                $responseMessage,
+                $requestMessage,
+                'Unexpected content, invalid SOAP message',
+                $previous
+            );
+        }
+    }
+
+    private function createFaultException(ResponseInterface $response, RequestInterface $request): FaultException
+    {
+        [$faultException, $faultClass] = $this->findFaultClass($response);
+
+        $fault = null;
+        if (null !== $faultClass) {
+            $bag = new HeaderBag();
+            $context = DeserializationContext::create()->setAttribute('headers_bag', $bag);
+            $fault = $this->serializer->deserialize((string) $response->getBody(), $faultClass, 'xml', $context);
+        }
+
+        return $faultException::createFromResponse($response, $request, $fault);
+    }
+
     /**
-     * @return RequestInterface|null
+     * @return string[]
      */
-    public function __getLastRequestMessage()
+    protected function findFaultClass(ResponseInterface $response): array
+    {
+        if (false === strpos((string) $response->getBody(), ':Fault>')) {
+            return [FaultException::class, null];
+        }
+
+        if (false !== strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml')) {
+            return [Fault12Exception::class, Fault12::class];
+        }
+
+        if (false !== strpos($response->getHeaderLine('Content-Type'), 'xml')) {
+            return [Fault11Exception::class, Fault11::class];
+        }
+    }
+
+    public function __getLastRequestMessage(): ?RequestInterface
     {
         return $this->requestMessage;
     }
-    /**
-     * @return ResponseInterface|null
-     */
-    public function __getLastResponseMessage()
+
+    public function __getLastResponseMessage(): ?ResponseInterface
     {
         return $this->responseMessage;
     }
 
-    protected function findFaultClass(ResponseInterface $response)
-    {
-        if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') === 0) {
-            return Fault12::class;
-        } else {
-            return Fault11::class;
-        }
-    }
-
-    protected function buildHeaders(array $operation)
+    /**
+     * @return string[]
+     */
+    protected function buildHeaders(array $operation): array
     {
         return [
-            'Content-Type' => isset($operation['version']) && $operation['version'] === '1.2'
+            'Content-Type' => isset($operation['version']) && '1.2' === $operation['version']
                 ? 'application/soap+xml; charset=utf-8'
                 : 'text/xml; charset=utf-8',
             'SoapAction' => '"' . $operation['action'] . '"',
         ];
     }
 
-    protected function findOperation($functionName, array $serviceDefinition)
+    protected function findOperation(string $functionName, array $serviceDefinition): array
     {
         if (isset($serviceDefinition['operations'][$functionName])) {
             return $serviceDefinition['operations'][$functionName];
         }
 
         foreach ($serviceDefinition['operations'] as $operation) {
-            if (strtolower($functionName) == strtolower($operation['method'])) {
+            if (strtolower($functionName) === strtolower($operation['method'])) {
                 return $operation;
             }
         }
-        throw new ClientException("Can not find an operation to run $functionName service call");
+
+        throw new ClientException(sprintf('Can not find an operation to run %s service call', $functionName));
+    }
+
+    private function createRequestMessage(string $xmlMessage, array $soapOperation): RequestInterface
+    {
+        $headers = $this->buildHeaders($soapOperation);
+        $requestMessage = $this->messageFactory
+            ->createRequest('POST', $this->serviceDefinition['endpoint'])
+            ->withBody($this->streamFactory->createStream($xmlMessage));
+        foreach ($headers as $name => $val) {
+            $requestMessage = $requestMessage->withHeader($name, $val);
+        }
+
+        if ($this->debug) {
+            $this->requestMessage = $requestMessage;
+        }
+
+        return $requestMessage;
     }
 }

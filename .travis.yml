@@ -8,14 +8,13 @@ git:
     depth: 1
 
 php:
-  - 7.1
   - 7.2
   - 7.3
   - 7.4
 
 matrix:
   include:
-    - php: 7.1
+    - php: 7.2
       env:
         - COVERAGE=true
         - COMPOSER_FLAGS='--prefer-lowest --prefer-stable'
@@ -35,4 +34,4 @@ script:
 after_success:
   - wget https://scrutinizer-ci.com/ocular.phar
   - if [ $COVERAGE ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
-  
+

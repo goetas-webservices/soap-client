@@ -1,37 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Result;
 
-use GoetasWebservices\SoapServices\SoapClient\SerializerUtils;
+use GoetasWebservices\SoapServices\Metadata\SerializerUtils;
 use JMS\Serializer\Serializer;
-use Metadata\MetadataFactoryInterface;
 use Metadata\PropertyMetadata;
 
 class ResultCreator implements ResultCreatorInterface
 {
+    /**
+     * @var bool
+     */
     private $unwrap = false;
     /**
      * @var Serializer
      */
     private $serializer;
 
-    public function __construct(Serializer $serializer, $unwrap = false)
+    public function __construct(Serializer $serializer, bool $unwrap = false)
     {
         $this->serializer = $serializer;
         $this->unwrap = $unwrap;
     }
 
-    private function getPropertyValue($propertyMetadata, $object) {
+    /**
+     * @return mixed
+     */
+    private function getPropertyValue(PropertyMetadata $propertyMetadata, object $object)
+    {
         $reflectionProperty = new \ReflectionProperty($propertyMetadata->class, $propertyMetadata->name);
         $reflectionProperty->setAccessible(true);
+
         return $reflectionProperty->getValue($object);
     }
 
-    public function prepareResult($object, array $output)
+    /**
+     * @return mixed
+     */
+    public function prepareResult(object $object, array $output)
     {
         if (!count($output['parts'])) {
             return null;
         }
+
         $factory = SerializerUtils::getMetadataFactory($this->serializer);
 
         $classMetadata = $factory->getMetadataForClass($output['message_fqcn']);
@@ -42,6 +55,7 @@ class ResultCreator implements ResultCreatorInterface
         foreach ($bodyClassMetadata->propertyMetadata as $propertyMetadata) {
             $parts[$propertyMetadata->name] = $this->getPropertyValue($propertyMetadata, $body);
         }
+
         if (count($output['parts']) > 1) {
             return $parts;
         } else {
@@ -50,15 +64,19 @@ class ResultCreator implements ResultCreatorInterface
                     $propClassMetadata = $factory->getMetadataForClass($propertyMetadata->type['name']);
 
                     if (count($propClassMetadata->propertyMetadata) > 1) {
-                        throw new \Exception("When using wrapped mode, the wrapped object can not have multiple properties");
+                        throw new \Exception('When using wrapped mode, the wrapped object can not have multiple properties');
                     }
+
                     if (!count($propClassMetadata->propertyMetadata)) {
                         return null;
                     }
+
                     $propertyMetadata = reset($propClassMetadata->propertyMetadata);
+
                     return $this->getPropertyValue($propertyMetadata, reset($parts));
                 }
             }
+
             return reset($parts);
         }
     }

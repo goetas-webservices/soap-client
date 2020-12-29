@@ -1,103 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
-use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\Header;
-use GoetasWebservices\SoapServices\SoapClient\Arguments\Headers\MustUnderstandHeader;
-use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapClient\Envelope\Handler\FaultHandler;
-use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope\Parts\Fault;
-use GoetasWebservices\SoapServices\SoapClient\Exception\FaultException;
-use GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator;
-use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
-use GoetasWebservices\WsdlToPhp\Tests\Generator;
+use Ex\GetMultiParam;
+use Ex\GetReturnMultiParam;
+use Ex\GetReturnMultiParamResponse;
+use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Header;
+use GoetasWebservices\SoapServices\Metadata\Envelope\Fault as FaultBase;
+use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope\Messages\Fault;
+use GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
+use GoetasWebservices\SoapServices\SoapClient\Client;
+use GoetasWebservices\SoapServices\SoapClient\Exception\Fault11Exception;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
-use JMS\Serializer\Handler\HandlerRegistryInterface;
-use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class ClientRequestResponsesTest extends TestCase
+class Client11RequestResponsesTest extends RequestResponsesTest
 {
-    protected static $namespaces = [
-        'http://www.example.org/test/' => "Ex"
-    ];
-    /**
-     * @var Generator
-     */
-    protected static $generator;
-    /**
-     * @var Server
-     */
-    protected static $server;
-
-    /**
-     * @var \GuzzleHttp\Handler\MockHandler
-     */
-    protected $responseMock;
-
-    protected $requestResponseStack = [];
-
-    public static function setUpBeforeClass(): void
+    protected function getClient(): Client
     {
-        self::$generator = new Generator(self::$namespaces);//, [], '/home/goetas/projects/soap-client/tmp');
-        self::$generator->generate([__DIR__ . '/../Fixtures/test.wsdl']);
-        self::$generator->registerAutoloader();
+        return $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
     }
 
-    public static function tearDownAfterClass(): void
-    {
-        self::$generator->unRegisterAutoloader();
-        //self::$generator->cleanDirectories();
-    }
-
-    public function setUp(): void
-    {
-        $generator = new Generator(self::$namespaces);
-        $ref = new \ReflectionClass(Fault::class);
-        $headerHandler = new HeaderHandler();
-        $serializer = $generator->buildSerializer(function (HandlerRegistryInterface $h) use ($headerHandler) {
-            $h->registerSubscribingHandler($headerHandler);
-            $h->registerSubscribingHandler(new FaultHandler());
-        }, [
-            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
-            'GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
-        ]);
-
-        $this->responseMock = new MockHandler();
-        $history = Middleware::history($this->requestResponseStack);
-
-        $handler = HandlerStack::create($this->responseMock);
-        $handler->push($history);
-
-        $guzzle = new Client(['handler' => $handler]);
-
-
-        $naming = new ShortNamingStrategy();
-        $dispatcher = new EventDispatcher();
-        $wsdlReader = new DefinitionsReader(null, $dispatcher);
-        $soapReader = new SoapReader();
-        $dispatcher->addSubscriber($soapReader);
-
-        $metadataGenerator = new MetadataGenerator($naming, self::$namespaces);
-        $metadataLoader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
-
-
-        $this->factory = new ClientFactory($metadataLoader, $serializer);
-        $this->factory->setHttpClient(new GuzzleAdapter($guzzle));
-        $this->factory->setHeaderHandler($headerHandler);
-    }
-
-    public function testGetLastRequestMessage()
+    public function testGetLastRequestMessage(): void
     {
         $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -110,14 +40,14 @@ class ClientRequestResponsesTest extends TestCase
 
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
-        $this->assertNull($client->__getLastRequestMessage());
+        $this->client->setDebug(true);
+        $this->assertNull($this->client->__getLastRequestMessage());
 
         /**
          * @var $response \Ex\GetSimpleResponse
          */
-        $response = $client->getSimple("foo");
-        $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $client->__getLastRequestMessage());
+        $response = $this->client->getSimple('foo');
+        $this->assertInstanceOf('Psr\Http\Message\RequestInterface', $this->client->__getLastRequestMessage());
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
               <SOAP:Body>
@@ -126,10 +56,11 @@ class ClientRequestResponsesTest extends TestCase
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
             </SOAP:Envelope>',
-            (string)$client->__getLastRequestMessage()->getBody());
+            (string) $this->client->__getLastRequestMessage()->getBody()
+        );
     }
 
-    public function testGetLastResponseMessage()
+    public function testGetLastResponseMessage(): void
     {
         $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -142,18 +73,18 @@ class ClientRequestResponsesTest extends TestCase
 
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
-        $this->assertNull($client->__getLastResponseMessage());
+        $this->client->setDebug(true);
+        $this->assertNull($this->client->__getLastResponseMessage());
 
         /**
          * @var $response \Ex\GetSimpleResponse
          */
-        $response = $client->getSimple("foo");
-        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $client->__getLastResponseMessage());
-        $this->assertSame($httpResponse, $client->__getLastResponseMessage());
+        $response = $this->client->getSimple('foo');
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $this->client->__getLastResponseMessage());
+        $this->assertSame($httpResponse, $this->client->__getLastResponseMessage());
     }
 
-    public function testGetSimple()
+    public function testGetSimple(): void
     {
         $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -166,16 +97,15 @@ class ClientRequestResponsesTest extends TestCase
 
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
         /**
          * @var $response \Ex\GetSimpleResponse
          */
-        $response = $client->getSimple("foo");
+        $response = $this->client->getSimple('foo');
         $this->assertInstanceOf('Ex\GetSimpleResponse', $response);
-        $this->assertEquals("A", $response->getOut());
+        $this->assertEquals('A', $response->getOut());
     }
 
-    public function testGetSimpleUnwrapped()
+    public function testGetSimpleUnwrapped(): void
     {
         $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -198,15 +128,15 @@ class ClientRequestResponsesTest extends TestCase
         $metadataReader = new DevMetadataLoader($metadataGenerator, $soapReader, $wsdlReader);
 
         $this->factory->setMetadataReader($metadataReader);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
+
         /**
          * @var $response \Ex\GetSimpleResponse
          */
-        $response = $client->getSimple("foo");
-        $this->assertSame("A", $response);
+        $response = $this->getClient()->getSimple('foo');
+        $this->assertSame('A', $response);
     }
 
-    public function testHeaders()
+    public function testHeaders(): void
     {
         $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
         <SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -220,13 +150,12 @@ class ClientRequestResponsesTest extends TestCase
         $this->responseMock->append($httpResponse);
         $this->responseMock->append($httpResponse);
 
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
+        $mp = new GetReturnMultiParam();
+        $mp->setIn('foo');
 
-        $mp = new \Ex\GetReturnMultiParam();
-        $mp->setIn("foo");
+        $this->client->getSimple('foo', new Header($mp));
+        $this->client->getSimple('foo', (new Header($mp))->mustUnderstand());
 
-        $client->getSimple("foo", new Header($mp));
-        $client->getSimple("foo", new MustUnderstandHeader($mp));
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
               <SOAP:Body>
@@ -240,7 +169,8 @@ class ClientRequestResponsesTest extends TestCase
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
             </SOAP:Envelope>',
-            (string)$this->requestResponseStack[0]['request']->getBody());
+            (string) $this->requestResponseStack[0]['request']->getBody()
+        );
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -255,10 +185,39 @@ class ClientRequestResponsesTest extends TestCase
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
             </SOAP:Envelope>',
-            (string)$this->requestResponseStack[1]['request']->getBody());
+            (string) $this->requestResponseStack[1]['request']->getBody()
+        );
     }
 
-    public function testNoOutput()
+    public function testResponseHeaders(): void
+    {
+        $httpResponse = new Response(
+            200,
+            ['Content-Type' => 'text/xml'],
+            '<soapenv:Envelope 
+                    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                    xmlns:test="http://www.example.org/test/">
+               <soapenv:Header>
+                  <test:authHeader>
+                     <user>username</user>
+                     <pwd>pass</pwd>
+                  </test:authHeader>
+               </soapenv:Header>
+               <soapenv:Body>
+                  <test:responseHeaderMessagesResponse>
+                     <out>str</out>
+                  </test:responseHeaderMessagesResponse>
+               </soapenv:Body>
+            </soapenv:Envelope>'
+        );
+
+        $this->responseMock->append($httpResponse);
+
+        $res = $this->client->responseHeaderMessages('foo');
+        $this->assertEquals('str', $res->getOut());
+    }
+
+    public function testNoOutput(): void
     {
         $this->responseMock->append(
             new Response(200, ['Content-Type' => 'text/xml'], '
@@ -266,13 +225,12 @@ class ClientRequestResponsesTest extends TestCase
               <SOAP:Body />
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
-        $response = $client->noOutput("foo");
+        $response = $this->client->noOutput('foo');
         $this->assertNull($response);
     }
 
-    public function testNoInput()
+    public function testNoInput(): void
     {
         $this->responseMock->append(
             new Response(200, ['Content-Type' => 'text/xml'], '
@@ -284,16 +242,15 @@ class ClientRequestResponsesTest extends TestCase
               </SOAP:Body>
             </SOAP:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
-        $client->noInput("foo");
+        $this->client->noInput('foo');
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
-            (string)$this->requestResponseStack[0]['request']->getBody()
+            (string) $this->requestResponseStack[0]['request']->getBody()
         );
     }
 
-    public function testNoBoth()
+    public function testNoBoth(): void
     {
         $this->responseMock->append(
             new Response(
@@ -302,17 +259,16 @@ class ClientRequestResponsesTest extends TestCase
                 '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
-        $response = $client->noBoth("foo");
+        $response = $this->client->noBoth('foo');
         $this->assertNull($response);
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/"/>',
-            (string)$this->requestResponseStack[0]['request']->getBody()
+            (string) $this->requestResponseStack[0]['request']->getBody()
         );
     }
 
-    public function testReturnMultiParam()
+    public function testReturnMultiParam(): void
     {
         $this->responseMock->append(
             new Response(
@@ -328,15 +284,16 @@ class ClientRequestResponsesTest extends TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
-        $mp = new \Ex\GetReturnMultiParam();
-        $mp->setIn("foo");
-        $return = $client->getReturnMultiParam($mp);
+        $mp = new GetReturnMultiParam();
+        $mp->setIn('foo');
+        $return = $this->client->getReturnMultiParam($mp);
+
         $this->assertCount(2, $return);
-        $this->assertEquals($return['otherParam'], "str");
-        $this->assertInstanceOf(\Ex\GetReturnMultiParamResponse::class, $return['parameters']);
-        $this->assertEquals($return['parameters']->getOut(), "foo");
+        $this->assertEquals($return['otherParam'], 'str');
+
+        $this->assertInstanceOf(GetReturnMultiParamResponse::class, $return['getReturnMultiParamResponse']);
+        $this->assertEquals($return['getReturnMultiParamResponse']->getOut(), 'foo');
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -346,10 +303,11 @@ class ClientRequestResponsesTest extends TestCase
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Body>
             </SOAP:Envelope>',
-            (string)$this->requestResponseStack[0]['request']->getBody());
+            (string) $this->requestResponseStack[0]['request']->getBody()
+        );
     }
 
-    public function testMultiParamRequest()
+    public function testMultiParamRequest(): void
     {
         $this->responseMock->append(
             new Response(
@@ -364,11 +322,10 @@ class ClientRequestResponsesTest extends TestCase
             </SOAP:Envelope>'
             )
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', null, null, true);
 
-        $mp = new \Ex\GetMultiParam();
-        $mp->setIn("foo");
-        $client->getMultiParam($mp, "str");
+        $mp = new GetMultiParam();
+        $mp->setIn('foo');
+        $this->client->getMultiParam($mp, 'str');
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
@@ -379,54 +336,52 @@ class ClientRequestResponsesTest extends TestCase
                 <other-param><![CDATA[str]]></other-param>
               </SOAP:Body>
             </SOAP:Envelope>',
-            (string)$this->requestResponseStack[0]['request']->getBody());
-    }
-
-    public function getErrorResponses()
-    {
-        return [
-            [new Response(500, ['Content-Type' => 'text/xml'], '<foo/>')],
-            [new Response(500, ['Content-Type' => 'text/html'])],
-            [new Response(404, ['Content-Type' => 'text/xml'], '<foo/>')],
-            [new Response(404, ['Content-Type' => 'text/html'])],
-            [new Response(200, ['Content-Type' => 'text/html'])],
-            //[new Response(200, ['Content-Type' => 'text/xml'], '<foo/>')],
-        ];
+            (string) $this->requestResponseStack[0]['request']->getBody()
+        );
     }
 
     /**
-     * @dataProvider getErrorResponses
-     * @param ResponseInterface $response
+     * @dataProvider getHttpFaultCodes
      */
-    public function testGetSimpleError(ResponseInterface $response)
-    {
-        $this->expectException(\Exception::class);
-        $this->responseMock->append($response);
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
-        $client->getSimple("foo");
-    }
-
-    public function testApplicationError()
+    public function testApplicationError(int $code): void
     {
         $this->responseMock->append(
-            new Response(500, ['Content-Type' => 'text/xml'], '
+            new Response($code, ['Content-Type' => 'text/xml'], '
             <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
                <SOAP-ENV:Body>
                    <SOAP-ENV:Fault>
                        <faultcode>SOAP-ENV:MustUnderstand</faultcode>
                        <faultstring>SOAP Must Understand Error</faultstring>
+                       <detail>
+                           <faultInfo>
+                              <faultType>Business Exception</faultType>
+                              <faultCode>100</faultCode>
+                              <message>some message</message>
+                              <faultState>fault state</faultState>
+                           </faultInfo>
+                       </detail>
                    </SOAP-ENV:Fault>
                </SOAP-ENV:Body>
             </SOAP-ENV:Envelope>')
         );
-        $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
 
         try {
-            $client->getSimple("foo");
-            $this->assertTrue(false, "Exception is not thrown");
-        } catch (FaultException $e) {
+            $this->client->getSimple('foo');
+            $this->assertTrue(false, 'Exception is not thrown');
+        } catch (Fault11Exception $e) {
             $this->assertInstanceOf(Fault::class, $e->getFault());
+            $this->assertInstanceOf(FaultBase::class, $e->getFault()->getBody()->getFault());
+
+            $detail = $e->getFault()->getBody()->getFault()->getRawDetail();
+            $this->assertInstanceOf(\SimpleXMLElement::class, $detail);
+            $this->assertXmlStringEqualsXmlString(trim('
+              <faultInfo>
+                <faultType>Business Exception</faultType>
+                <faultCode>100</faultCode>
+                <message>some message</message>
+                <faultState>fault state</faultState>
+              </faultInfo>
+            '), $detail->asXML());
         }
     }
-
 }

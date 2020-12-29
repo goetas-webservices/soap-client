@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Stub;
 
 use GoetasWebservices\SoapServices\SoapClient\Builder\SoapContainerBuilder;
@@ -7,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class StubGeneratorTest extends TestCase
 {
-    public function testDI()
+    public function testDI(): void
     {
         $builder = new SoapContainerBuilder(__DIR__ . '/../Fixtures/config.yml');
         $debugContainer = $builder->getDebugContainer();
@@ -27,11 +29,9 @@ class StubGeneratorTest extends TestCase
             $schemas[] = $definitions->getSchema();
             $portTypes = array_merge($portTypes, $definitions->getAllPortTypes());
         }
+
         $classDefinitions = $clientStubGenerator->generate($portTypes);
 
         $this->assertCount(2, $classDefinitions);
-
-
     }
-
 }

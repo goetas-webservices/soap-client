@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
+use GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
-use GoetasWebservices\SoapServices\SoapClient\Metadata\Generator\MetadataGenerator;
-use GoetasWebservices\SoapServices\SoapClient\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -22,9 +24,7 @@ class BuildClientTest extends TestCase
 
     public function setUp(): void
     {
-        $namespaces = [
-            'http://www.example.org/test/' => "Ex"
-        ];
+        $namespaces = ['http://www.example.org/test/' => 'Ex'];
         $generator = new Generator($namespaces);
         $serializer = $generator->buildSerializer();
 
@@ -40,32 +40,31 @@ class BuildClientTest extends TestCase
         $this->factory = new ClientFactory($metadataLoader, $serializer);
     }
 
-    public function testBuildServer()
+    public function testBuildServer(): void
     {
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl');
         $this->assertNotNull($client);
     }
 
-    public function testGetService()
+    public function testGetService(): void
     {
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP');
         $this->assertNotNull($client);
     }
 
-    public function testGetWrongPort()
+    public function testGetWrongPort(): void
     {
         $this->expectException(PortNotFoundException::class);
-        $this->expectExceptionMessage("The port named XXX can not be found");
+        $this->expectExceptionMessage('The port named XXX can not be found');
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'XXX');
         $this->assertNotNull($client);
     }
 
-    public function testGetWrongService()
+    public function testGetWrongService(): void
     {
         $this->expectException(PortNotFoundException::class);
-        $this->expectExceptionMessage("The port named testSOAP can not be found");
+        $this->expectExceptionMessage('The port named testSOAP can not be found');
         $client = $this->factory->getClient(__DIR__ . '/../Fixtures/test.wsdl', 'testSOAP', 'alternativeTest');
         $this->assertNotNull($client);
     }
-
 }

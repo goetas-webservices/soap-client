@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace GoetasWebservices\SoapServices\SoapClient\Exception;
 
-use GoetasWebservices\SoapServices\SoapClient\Envelope\SoapEnvelope12\Parts\Fault;
+use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12\Messages\Fault;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -13,17 +15,19 @@ class Fault12Exception extends FaultException
      */
     private $fault;
 
-    public function __construct(Fault $fault, ResponseInterface $response, RequestInterface $request, \Exception $previous = null)
+    public function __construct(Fault $fault, ResponseInterface $response, RequestInterface $request, ?\Throwable $previous = null)
     {
         parent::__construct($response, $request, $previous);
         $this->fault = $fault;
     }
 
-    /**
-     * @return Fault
-     */
-    public function getFault()
+    public function getFault(): Fault
     {
         return $this->fault;
+    }
+
+    public static function createFromResponse(ResponseInterface $response, RequestInterface $request, ?Fault $fault = null): FaultException
+    {
+        return new self($fault, $response, $request);
     }
 }
