@@ -16,8 +16,14 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('soap_client');
+        $treeBuilder = new TreeBuilder('soap_client');
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            $rootNode = $treeBuilder->root('soap_client');
+        }
+
         $rootNode
             ->children()
             ->arrayNode('alternative_endpoints')->fixXmlConfig('alternative_endpoint')
