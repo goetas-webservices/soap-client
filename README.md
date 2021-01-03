@@ -170,6 +170,11 @@ $client = $factory->getClient('http://www.webservicex.net/weather.asmx?WSDL');
 
 // call the webservice
 $result = $client->getWeather(2010, "May", "USA");
+
+// call the webservice with custom headers
+$result = $client->getWeather(2010, "May", "USA", Header::asMustUnderstand(new SomeAuth('me', 'pwd')));
+
+
 ```
 
 
