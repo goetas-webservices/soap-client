@@ -23,7 +23,6 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
-use JMS\Serializer\SerializerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -76,20 +75,20 @@ abstract class RequestResponsesTest extends TestCase
     {
         $ref = new \ReflectionClass(Fault::class);
 
-        $serializer = self::$generator->buildSerializer(static function (SerializerBuilder $builder): void {
-            $headerHandler = new HeaderHandler();
-            $builder->configureListeners(static function (EventDispatcherInterface $d) use ($builder, $headerHandler): void {
-                $builder->addDefaultListeners();
-                $d->addSubscriber($headerHandler);
-            });
-            $builder->configureHandlers(static function (HandlerRegistryInterface $h) use ($builder, $headerHandler): void {
-                $builder->addDefaultHandlers();
-                $h->registerSubscribingHandler($headerHandler);
-            });
-        }, [
+        $headerHandler = new HeaderHandler();
+
+        $listeners = static function (EventDispatcherInterface $d) use ($headerHandler): void {
+            $d->addSubscriber($headerHandler);
+        };
+
+        $handlers = static function (HandlerRegistryInterface $h) use ($headerHandler): void {
+            $h->registerSubscribingHandler($headerHandler);
+        };
+
+        $serializer = self::$generator->buildSerializer($handlers, [
             'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
             'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
-        ]);
+        ], $listeners);
 
         $this->responseMock = new MockHandler();
         $history = Middleware::history($this->requestResponseStack);

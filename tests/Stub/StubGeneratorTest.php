@@ -17,9 +17,9 @@ class StubGeneratorTest extends TestCase
         /**
          * @var $clientStubGenerator \GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator
          */
-        $clientStubGenerator = $debugContainer->get('goetas_webservices.soap_client.stub.client_generator');
+        $clientStubGenerator = $debugContainer->get('goetas_webservices.soap.stub.client_generator');
 
-        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
+        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap.config')['metadata'];
         $schemas = [];
         $portTypes = [];
         $wsdlReader = $debugContainer->get('goetas_webservices.wsdl2php.wsdl_reader');
