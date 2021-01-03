@@ -16,12 +16,9 @@ matrix:
   include:
     - php: 7.2
       env:
-        - COVERAGE=true
         - COMPOSER_FLAGS='--prefer-lowest --prefer-stable'
 
 before_script:
-  - echo "xdebug.max_nesting_level=1000" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - if [ $COVERAGE ]; then PHPUNIT_FLAGS="--coverage-clover=coverage.clover"; else PHPUNIT_FLAGS=""; fi
   - phpenv config-rm xdebug.ini
   - composer self-update
   - composer update $COMPOSER_FLAGS
@@ -30,8 +27,3 @@ script:
   - vendor/phpunit/phpunit/phpunit $PHPUNIT_FLAGS
   - bin/soap-client generate tests/Fixtures/config.yml soap/src/Container -vvv --dest-class=TestNs/Container/SoapClientContainer
   - php tests/example.php
-
-after_success:
-  - wget https://scrutinizer-ci.com/ocular.phar
-  - if [ $COVERAGE ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
-
