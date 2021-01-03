@@ -19,11 +19,12 @@
     "psr/http-client-implementation": "^1.0",
 
     "php-http/discovery": "^1.6",
-    "symfony/dependency-injection": "^2.4|^3.0|^4.0|^5.0",
+
+    "symfony/dependency-injection": "^3.3|^4.0|^5.0",
     "doctrine/instantiator": "^1.0.3",
+    "jms/serializer": "^1.6|^2.0|^3.0",
 
     "goetas-webservices/xsd2php-runtime": "^0.2.11",
-    "jms/serializer": "^1.6|^2.0|^3.0",
     "goetas-webservices/soap-common": "^0.2.0"
   },
   "require-dev": {
