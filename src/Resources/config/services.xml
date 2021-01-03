@@ -3,26 +3,26 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="goetas_webservices.soap_client.unwrap_returns" type="constant">FALSE</parameter>
+        <parameter key="goetas_webservices.soap.unwrap_returns" type="constant">FALSE</parameter>
     </parameters>
 
     <services>
 
-        <service id="goetas_webservices.soap_client.metadata_loader.dev"
+        <service id="goetas_webservices.soap.metadata_loader.dev"
                  class="GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader"
                  public="true">
-            <argument type="service" id="goetas_webservices.soap_client.metadata.generator"/>
+            <argument type="service" id="goetas_webservices.soap.metadata.generator"/>
             <argument type="service" id="goetas_webservices.wsdl2php.soap_reader"/>
             <argument type="service" id="goetas_webservices.wsdl2php.wsdl_reader"/>
         </service>
 
-        <service id="goetas_webservices.soap_client.metadata_loader.array"
+        <service id="goetas_webservices.soap.metadata_loader.array"
                  class="GoetasWebservices\SoapServices\Metadata\Loader\ArrayMetadataLoader"
                  public="true">
-            <argument>%goetas_webservices.soap_client.metadata%</argument>
+            <argument>%goetas_webservices.soap.metadata%</argument>
         </service>
 
-        <service id="goetas_webservices.soap_client.metadata.generator"
+        <service id="goetas_webservices.soap.metadata.generator"
                  class="GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator"
                  public="true">
             <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
@@ -36,16 +36,16 @@
                  class="GoetasWebservices\Xsd\XsdToPhp\Naming\LongNamingStrategy"
                  public="true"/>
 
-        <service id="goetas_webservices.soap_client.metadata_reader" synthetic="true" public="true"/>
+        <service id="goetas_webservices.soap.metadata_reader" synthetic="true" public="true"/>
 
         <service id="logger" public="true" class="Psr\Log\NullLogger"/>
 
-        <service id="goetas_webservices.soap_client.stub.client_generator"
+        <service id="goetas_webservices.soap.stub.client_generator"
                  class="GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator"
                  public="true">
             <argument id="goetas_webservices.xsd2php.converter.php" type="service"/>
             <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
-            <argument>%goetas_webservices.soap_client.unwrap_returns%</argument>
+            <argument>%goetas_webservices.soap.unwrap_returns%</argument>
             <argument type="collection"/>
         </service>
 
@@ -64,12 +64,12 @@
                  class="GoetasWebservices\Xsd\XsdToPhp\Jms\PathGenerator\Psr4PathGenerator"
                  public="false"/>
 
-        <service id="goetas_webservices.soap_client.stub.class_writer"
+        <service id="goetas_webservices.soap.stub.class_writer"
                  class="GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator"
                  public="true">
             <argument id="goetas_webservices.xsd2php.converter.php" type="service"/>
             <argument id="goetas_webservices.xsd2php.naming_convention" type="service"/>
-            <argument>%goetas_webservices.soap_client.unwrap_returns%</argument>
+            <argument>%goetas_webservices.soap.unwrap_returns%</argument>
             <argument type="collection"/>
         </service>
 

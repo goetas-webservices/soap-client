@@ -19,9 +19,19 @@ class ParamTag extends ParamTagTag
      */
     protected $default;
 
+    /**
+     * @var string
+     */
+    protected $varidic = false;
+
     public function setDefault(string $default): void
     {
         $this->default = $default;
+    }
+
+    public function setVaridic(): void
+    {
+        $this->varidic = true;
     }
 
     public function generate(): string
@@ -36,7 +46,7 @@ class ParamTag extends ParamTagTag
     public function generateForMethod(): string
     {
         return (!empty($this->types) ? $this->getTypesAsString() : '')
-            . (!empty($this->variableName) ? ' $' . $this->variableName : '')
+            . (!empty($this->variableName) ? ' ' . ($this->varidic ? '...' : '') . '$' . $this->variableName : '')
             . (!empty($this->default) ? ' = ' . $this->default : '');
     }
 }

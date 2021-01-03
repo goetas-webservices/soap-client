@@ -1,9 +1,6 @@
 # goetas-webservices / soap-client
 
 [![Build Status](https://travis-ci.org/goetas-webservices/soap-client.svg?branch=master)](https://travis-ci.org/goetas-webservices/soap-client)
-[![Code Coverage](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/goetas-webservices/soap-client/?branch=master)
-
 
 PHP implementation of SOAP 1.1 and 1.2 client specifications.
 
@@ -11,8 +8,9 @@ Strengths:
 
 - Pure PHP, no dependencies on `ext-soap`
 - Extensible (JMS event listeners support)
-- PSR-7 HTTP messaging compatible 
-- Multi HTTP client (guzzle, buzz, curl, react)
+- PSR-7 HTTP messaging
+- PSR-17 HTTP messaging factories
+- PSR-18 HTTP Client
 - No WSDL/XSD parsing on production
 - IDE type hinting support
 
@@ -38,17 +36,13 @@ Add this packages to your `composer.json` file.
 ```
 {
     "require": {
-        "goetas-webservices/soap-client": "^0.2",
+        "goetas-webservices/soap-client": "^0.3",
     },
     "require-dev": {
-        "goetas-webservices/wsdl2php": "^0.3",
+        "goetas-webservices/wsdl2php": "^0.4",
     },
 }
 ```
-
-More dependencies might be needed depending on your PSR-7 and HTTP client preferred implementation.
-You can have a look to the [Dependencies](https://github.com/goetas-webservices/soap-client-demo#dependencies) section 
-of a demo project to understand what can be necessary.
 
 # How to
 
@@ -164,7 +158,7 @@ $container = new SoapClientContainer();
 // create a JMS serializer instance
 $serializer = SoapContainerBuilder::createSerializerBuilderFromContainer($container)->build();
 // get the metadata from the container
-$metadata = $container->get('goetas_webservices.soap_client.metadata_reader');
+$metadata = $container->get('goetas_webservices.soap.metadata_reader');
 
 $factory = new ClientFactory($metadata, $serializer);
 

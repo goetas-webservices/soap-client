@@ -7,7 +7,7 @@ namespace GoetasWebservices\SoapServices\SoapClient\Exception;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class ServerException extends \Exception
+class ServerException extends SoapException
 {
     /**
      * @var RequestInterface
@@ -19,9 +19,9 @@ class ServerException extends \Exception
      */
     private $response;
 
-    public function __construct(ResponseInterface $response, RequestInterface $request, ?\Throwable $previous = null)
+    public function __construct(string $message, ResponseInterface $response, RequestInterface $request, ?\Throwable $previous = null)
     {
-        parent::__construct('Server error', null, $previous);
+        parent::__construct($message, 0, $previous);
         $this->response = $response;
         $this->request = $request;
     }

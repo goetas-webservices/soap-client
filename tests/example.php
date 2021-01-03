@@ -14,7 +14,6 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Http\Adapter\Guzzle6\Client as GuzzleAdapter;
 use TestNs\Container\SoapClientContainer;
 use TestNs\GetSimpleResponse;
 
@@ -24,7 +23,7 @@ $loader->addPsr4('TestNs\\', __DIR__ . '/../soap/src');
 $container = new SoapClientContainer();
 
 $serializer = SoapContainerBuilder::createSerializerBuilderFromContainer($container)->build();
-$metadata = $container->get('goetas_webservices.soap_client.metadata_reader');
+$metadata = $container->get('goetas_webservices.soap.metadata_reader');
 
 $responseMock = new MockHandler();
 $httpResponse = new Response(200, ['Content-Type' => 'text/xml'], '
@@ -47,7 +46,7 @@ $handler->push($history);
 $guzzle = new Client(['handler' => $handler]);
 
 $factory = new ClientFactory($metadata, $serializer);
-$factory->setHttpClient(new GuzzleAdapter($guzzle));
+$factory->setHttpClient($guzzle);
 
 /**
  * @var $client \TestNs\SoapStubs\Test

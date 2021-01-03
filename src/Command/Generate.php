@@ -18,7 +18,7 @@ class Generate extends Command
     {
         parent::configure();
         $this->setName('generate');
-        $this->setDescription('Convert create all the necessary PHP classes for a SOAP client');
+        $this->setDescription('Create all the necessary PHP classes for a SOAP client');
         $this->setDefinition([
             new InputArgument('config', InputArgument::REQUIRED, 'Config file location'),
             new InputArgument('dest-dir', InputArgument::REQUIRED, 'Container files destination directory'),
@@ -38,7 +38,7 @@ class Generate extends Command
         $debugContainer = $containerBuilder->getDebugContainer();
         //$debugContainer->set('logger', $logger);
 
-        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap_client.config')['metadata'];
+        $wsdlMetadata = $debugContainer->getParameter('goetas_webservices.soap.config')['metadata'];
 
         $schemas = [];
         $portTypes = [];
@@ -65,12 +65,9 @@ class Generate extends Command
 
         $containerBuilder->dumpContainerForProd($input->getArgument('dest-dir'), $debugContainer);
 
-        /**
-         * @var $clientStubGenerator \GoetasWebservices\SoapServices\SoapClient\StubGeneration\ClientStubGenerator
-         */
-        $clientStubGenerator = $debugContainer->get('goetas_webservices.soap_client.stub.client_generator');
+        $stubGenerator = $debugContainer->get('goetas_webservices.soap.stub.client_generator');
 
-        $classDefinitions = $clientStubGenerator->generate($portTypes);
+        $classDefinitions = $stubGenerator->generate($portTypes);
         $classWriter = $debugContainer->get('goetas_webservices.xsd2php.class_writer.php');
         $classWriter->write($classDefinitions);
 

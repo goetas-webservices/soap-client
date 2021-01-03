@@ -15,9 +15,11 @@ class Fault12Exception extends FaultException
      */
     private $fault;
 
-    public function __construct(Fault $fault, ResponseInterface $response, RequestInterface $request, ?\Throwable $previous = null)
+    private function __construct(Fault $fault, ResponseInterface $response, RequestInterface $request, ?\Throwable $previous = null)
     {
-        parent::__construct($response, $request, $previous);
+        $message = implode(', ', $fault->getBody()->getFault()->getReason());
+
+        parent::__construct($message, $response, $request, $previous);
         $this->fault = $fault;
     }
 
@@ -26,7 +28,7 @@ class Fault12Exception extends FaultException
         return $this->fault;
     }
 
-    public static function createFromResponse(ResponseInterface $response, RequestInterface $request, ?Fault $fault = null): FaultException
+    public static function createFromResponse(ResponseInterface $response, RequestInterface $request, Fault $fault): FaultException
     {
         return new self($fault, $response, $request);
     }

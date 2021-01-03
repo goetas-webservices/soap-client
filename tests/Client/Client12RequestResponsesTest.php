@@ -7,10 +7,10 @@ namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 use Ex\GetMultiParam;
 use Ex\GetReturnMultiParam;
 use Ex\GetReturnMultiParamResponse;
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\Metadata\Envelope\Fault as FaultBase;
 use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12\Messages\Fault;
 use GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapClient\Client;
 use GoetasWebservices\SoapServices\SoapClient\Exception\Fault12Exception;
@@ -158,33 +158,36 @@ class Client12RequestResponsesTest extends RequestResponsesTest
         $this->client->getSimple('foo', new Header($mp));
         $this->client->getSimple('foo', (new Header($mp))->mustUnderstand());
         $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
-              <SOAP:Body>
-                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
-                  <in><![CDATA[foo]]></in>
-                </ns-b3c6b39d:getSimple>
-              </SOAP:Body>
+            trim(
+                '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
-            </SOAP:Envelope>',
-            (string) $this->requestResponseStack[0]['request']->getBody()
-        );
-
-        $this->assertXmlStringEqualsXmlString(
-            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
               <SOAP:Body>
                 <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getSimple>
               </SOAP:Body>
-              <SOAP:Header>
+            </SOAP:Envelope>'
+            ),
+            (string) $this->requestResponseStack[0]['request']->getBody()
+        );
+
+        $this->assertXmlStringEqualsXmlString(
+            '<SOAP:Envelope xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope">
+                <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://www.w3.org/2003/05/soap-envelope" SOAP:mustUnderstand="true">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
+              <SOAP:Body>
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
+              
             </SOAP:Envelope>',
             (string) $this->requestResponseStack[1]['request']->getBody()
         );
@@ -359,6 +362,9 @@ class Client12RequestResponsesTest extends RequestResponsesTest
                        <SOAP-ENV:Code>
                             <SOAP-ENV:Value>server</SOAP-ENV:Value>
                        </SOAP-ENV:Code>
+                       <SOAP-ENV:Reason>
+                          <SOAP-ENV:Text>String index out of range: 3</SOAP-ENV:Text>
+                       </SOAP-ENV:Reason>
                        <SOAP-ENV:Detail>
                               <faultInfo>
                                 <faultType>Business Exception</faultType>
@@ -377,6 +383,7 @@ class Client12RequestResponsesTest extends RequestResponsesTest
             $this->assertTrue(false, 'Exception is not thrown');
         } catch (Fault12Exception $e) {
             $this->assertInstanceOf(Fault::class, $e->getFault());
+            $this->assertSame('String index out of range: 3', $e->getMessage());
             $this->assertInstanceOf(FaultBase::class, $e->getFault()->getBody()->getFault());
 
             $detail = $e->getFault()->getBody()->getFault()->getRawDetail();

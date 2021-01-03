@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Handler\FaultHandler;
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Handler\HeaderHandler;
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Handler\HeaderPlaceholder;
 use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12\Messages\Fault;
 use GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\Metadata\Headers\Handler\HeaderHandler;
 use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapClient\Client;
 use GoetasWebservices\SoapServices\SoapClient\ClientFactory;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
+use GoetasWebservices\SoapServices\SoapClient\Exception\UnexpectedFormatException;
 use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
@@ -22,7 +21,9 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
+use JMS\Serializer\SerializerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -74,16 +75,20 @@ abstract class RequestResponsesTest extends TestCase
     public function setUp(): void
     {
         $ref = new \ReflectionClass(Fault::class);
-        $refPl = new \ReflectionClass(HeaderPlaceholder::class);
 
-        $headerHandler = new HeaderHandler();
-        $serializer = self::$generator->buildSerializer(static function (HandlerRegistryInterface $h) use ($headerHandler): void {
-            $h->registerSubscribingHandler($headerHandler);
-            $h->registerSubscribingHandler(new FaultHandler());
+        $serializer = self::$generator->buildSerializer(static function (SerializerBuilder $builder): void {
+            $headerHandler = new HeaderHandler();
+            $builder->configureListeners(static function (EventDispatcherInterface $d) use ($builder, $headerHandler): void {
+                $builder->addDefaultListeners();
+                $d->addSubscriber($headerHandler);
+            });
+            $builder->configureHandlers(static function (HandlerRegistryInterface $h) use ($builder, $headerHandler): void {
+                $builder->addDefaultHandlers();
+                $h->registerSubscribingHandler($headerHandler);
+            });
         }, [
             'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
             'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
-            'GoetasWebservices\SoapServices\Metadata' => dirname($refPl->getFileName()) . '/../../../Resources/metadata/jms-envelope',
         ]);
 
         $this->responseMock = new MockHandler();
@@ -144,7 +149,7 @@ abstract class RequestResponsesTest extends TestCase
      */
     public function testGetSimpleError(ResponseInterface $response): void
     {
-        $this->expectException(\Throwable::class);
+        $this->expectException(UnexpectedFormatException::class);
         $this->responseMock->append($response);
 
         $this->client->getSimple('foo');

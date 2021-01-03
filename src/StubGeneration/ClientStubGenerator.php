@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration;
 
 use Doctrine\Common\Inflector\Inflector;
+use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\MethodTag;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag;
 use GoetasWebservices\XML\WSDLReader\Wsdl\Message\Part;
@@ -17,30 +18,6 @@ use Zend\Code\Generator\DocBlockGenerator;
 
 class ClientStubGenerator
 {
-    /**
-     * @var string[]
-     */
-    protected $reservedWords = [
-        'int',
-        'float',
-        'bool',
-        'string',
-        'true',
-        'false',
-        'null',
-        'resource',
-        'object',
-        'mixed',
-        'numeric',
-    ];
-    /**
-     * @var string[]
-     */
-    private $baseNs = [
-        'headers' => '\\SoapEnvelope\\Headers',
-        'parts' => '\\SoapEnvelope\\Parts',
-        'messages' => '\\SoapEnvelope\\Messages',
-    ];
     /**
      * @var NamingStrategy
      */
@@ -56,13 +33,6 @@ class ClientStubGenerator
 
     public function __construct(PhpConverter $phpConverter, NamingStrategy $namingStrategy, bool $unwrapReturn = false, array $baseNs = [])
     {
-        foreach ($baseNs as $k => $ns) {
-            if (isset($this->baseNs[$k])) {
-                $this->baseNs[$k] = $ns;
-            }
-        }
-
-        $this->baseNs = $baseNs;
         $this->namingStrategy = $namingStrategy;
         $this->phpConverter = $phpConverter;
         $this->unwrapReturn = $unwrapReturn;
@@ -123,6 +93,9 @@ class ClientStubGenerator
             preg_replace("/[\n\r]+/", ' ', $operation->getDocumentation())
         );
         $params = $this->getOperationParams($operation);
+        $params[] = $param = new ParamTag('header', ['\\' . Header::class]);
+        $param->setVaridic();
+
         $operationTag->setParams($params);
 
         return $operationTag;

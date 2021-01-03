@@ -7,10 +7,10 @@ namespace GoetasWebservices\SoapServices\SoapClient\Tests\Client;
 use Ex\GetMultiParam;
 use Ex\GetReturnMultiParam;
 use Ex\GetReturnMultiParamResponse;
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\Header;
 use GoetasWebservices\SoapServices\Metadata\Envelope\Fault as FaultBase;
 use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope\Messages\Fault;
 use GoetasWebservices\SoapServices\Metadata\Generator\MetadataGenerator;
+use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapClient\Client;
 use GoetasWebservices\SoapServices\SoapClient\Exception\Fault11Exception;
@@ -155,35 +155,35 @@ class Client11RequestResponsesTest extends RequestResponsesTest
 
         $this->client->getSimple('foo', new Header($mp));
         $this->client->getSimple('foo', (new Header($mp))->mustUnderstand());
-
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
-              <SOAP:Body>
-                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
-                  <in><![CDATA[foo]]></in>
-                </ns-b3c6b39d:getSimple>
-              </SOAP:Body>
               <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
+              <SOAP:Body>
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
             </SOAP:Envelope>',
             (string) $this->requestResponseStack[0]['request']->getBody()
         );
 
         $this->assertXmlStringEqualsXmlString(
             '<SOAP:Envelope xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/">
-              <SOAP:Body>
-                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
-                  <in><![CDATA[foo]]></in>
-                </ns-b3c6b39d:getSimple>
-              </SOAP:Body>
               <SOAP:Header>
                 <ns-b3c6b39d:getReturnMultiParam xmlns:ns-b3c6b39d="http://www.example.org/test/" xmlns:SOAP="http://schemas.xmlsoap.org/soap/envelope/" SOAP:mustUnderstand="true">
                   <in><![CDATA[foo]]></in>
                 </ns-b3c6b39d:getReturnMultiParam>
               </SOAP:Header>
+              <SOAP:Body>
+                <ns-b3c6b39d:getSimple xmlns:ns-b3c6b39d="http://www.example.org/test/">
+                  <in><![CDATA[foo]]></in>
+                </ns-b3c6b39d:getSimple>
+              </SOAP:Body>
+             
             </SOAP:Envelope>',
             (string) $this->requestResponseStack[1]['request']->getBody()
         );
@@ -370,6 +370,7 @@ class Client11RequestResponsesTest extends RequestResponsesTest
             $this->assertTrue(false, 'Exception is not thrown');
         } catch (Fault11Exception $e) {
             $this->assertInstanceOf(Fault::class, $e->getFault());
+            $this->assertSame('SOAP Must Understand Error', $e->getMessage());
             $this->assertInstanceOf(FaultBase::class, $e->getFault()->getBody()->getFault());
 
             $detail = $e->getFault()->getBody()->getFault()->getRawDetail();

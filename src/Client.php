@@ -6,9 +6,11 @@ namespace GoetasWebservices\SoapServices\SoapClient;
 
 use GoetasWebservices\SoapServices\Metadata\Arguments\ArgumentsReader;
 use GoetasWebservices\SoapServices\Metadata\Arguments\ArgumentsReaderInterface;
-use GoetasWebservices\SoapServices\Metadata\Arguments\Headers\HeaderBag;
 use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope\Messages\Fault as Fault11;
 use GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12\Messages\Fault as Fault12;
+use GoetasWebservices\SoapServices\Metadata\Headers\Header;
+use GoetasWebservices\SoapServices\Metadata\Headers\HeadersIncoming;
+use GoetasWebservices\SoapServices\Metadata\Headers\HeadersOutgoing;
 use GoetasWebservices\SoapServices\SoapClient\Exception\ClientException;
 use GoetasWebservices\SoapServices\SoapClient\Exception\Fault11Exception;
 use GoetasWebservices\SoapServices\SoapClient\Exception\Fault12Exception;
@@ -99,6 +101,19 @@ class Client
         $this->debug = $debug;
     }
 
+    private function extractHeaders(array $args): array
+    {
+        $headers = [];
+        foreach ($args as $k => $arg) {
+            if ($arg instanceof Header) {
+                $headers[] = $arg;
+                unset($args[$k]);
+            }
+        }
+
+        return [$args, $headers];
+    }
+
     /**
      * @param array $args
      *
@@ -110,11 +125,12 @@ class Client
      */
     public function __call(string $functionName, array $args)
     {
+        [$args, $headers] = $this->extractHeaders($args);
         $soapOperation = $this->findOperation($functionName, $this->serviceDefinition);
         $message = $this->argumentsReader->readArguments($args, $soapOperation['input']);
 
-        $bag = new HeaderBag();
-        $context = SerializationContext::create()->setAttribute('header_bag', $bag);
+        $bag = new HeadersOutgoing($headers);
+        $context = SerializationContext::create()->setAttribute('headers_outgoing', $bag);
         $xmlMessage = $this->serializer->serialize($message, 'xml', $context);
 
         $requestMessage = $this->createRequestMessage($xmlMessage, $soapOperation);
@@ -142,8 +158,8 @@ class Client
             throw $this->createFaultException($responseMessage, $requestMessage);
         }
 
-        $bag = new HeaderBag();
-        $context = DeserializationContext::create()->setAttribute('headers_bag', $bag);
+        $bag = new HeadersIncoming();
+        $context = DeserializationContext::create()->setAttribute('headers_incoming', $bag);
         $response = $this->serializer->deserialize($body, $soapOperation['output']['message_fqcn'], 'xml', $context);
 
         return $this->resultCreator->prepareResult($response, $soapOperation['output']);
@@ -153,9 +169,9 @@ class Client
     {
         if (false === strpos($responseMessage->getHeaderLine('Content-Type'), 'xml')) {
             throw new UnexpectedFormatException(
+                "Unexpected content type '" . $responseMessage->getHeaderLine('Content-Type') . "'",
                 $responseMessage,
                 $requestMessage,
-                "Unexpected content type '" . $responseMessage->getHeaderLine('Content-Type') . "'",
                 $previous
             );
         }
@@ -164,9 +180,9 @@ class Client
 
         if (false === strpos($body, 'http://schemas.xmlsoap.org/soap/envelope/') && false === strpos($body, 'http://www.w3.org/2003/05/soap-envelope')) {
             throw new UnexpectedFormatException(
+                'Unexpected content, invalid SOAP message',
                 $responseMessage,
                 $requestMessage,
-                'Unexpected content, invalid SOAP message',
                 $previous
             );
         }
@@ -178,8 +194,8 @@ class Client
 
         $fault = null;
         if (null !== $faultClass) {
-            $bag = new HeaderBag();
-            $context = DeserializationContext::create()->setAttribute('headers_bag', $bag);
+            $bag = new HeadersIncoming();
+            $context = DeserializationContext::create()->setAttribute('headers_incoming', $bag);
             $fault = $this->serializer->deserialize((string) $response->getBody(), $faultClass, 'xml', $context);
         }
 
