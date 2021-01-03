@@ -31,7 +31,7 @@
 
     "goetas-webservices/xsd2php": "^0.4.1",
     "goetas-webservices/wsdl2php": "^0.5.0",
-    "laminas/laminas-diactoros": "^2.5",
+    "laminas/laminas-diactoros": "^2.4",
     "guzzlehttp/guzzle": "^7.2",
     "doctrine/coding-standard": "^8.1"
   },
