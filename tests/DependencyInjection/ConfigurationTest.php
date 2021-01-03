@@ -17,6 +17,6 @@ class ConfigurationTest extends TestCase
         $tempDir = sys_get_temp_dir();
 
         $builder->dumpContainerForProd($tempDir, $debugContainer);
-        $this->assertFileExists($tempDir . '/SoapClientContainer.php');
+        $this->assertFileExists($tempDir . '/SoapContainer.php');
     }
 }
