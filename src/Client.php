@@ -146,7 +146,7 @@ class Client
 
     protected function findFaultClass(ResponseInterface $response)
     {
-        if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') === 0) {
+        if (strpos($response->getHeaderLine('Content-Type'), 'application/soap+xml') !== false) {
             return Fault12::class;
         } else {
             return Fault11::class;
