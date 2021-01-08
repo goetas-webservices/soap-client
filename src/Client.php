@@ -131,6 +131,9 @@ class Client
 
         $bag = new HeadersOutgoing($headers);
         $context = SerializationContext::create()->setAttribute('headers_outgoing', $bag);
+        $context->setAttribute('soapAction', $soapOperation['action']);
+        $context->setAttribute('soapEndpoint', $this->serviceDefinition['endpoint']);
+
         $xmlMessage = $this->serializer->serialize($message, 'xml', $context);
 
         $requestMessage = $this->createRequestMessage($xmlMessage, $soapOperation);
