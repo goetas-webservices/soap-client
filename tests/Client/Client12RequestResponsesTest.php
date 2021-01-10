@@ -20,7 +20,6 @@ use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
 use GuzzleHttp\Psr7\Response;
 use JMS\Serializer\Context;
 use JMS\Serializer\GraphNavigator;
-use JMS\Serializer\Handler\HandlerRegistryInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Client12RequestResponsesTest extends RequestResponsesTest
@@ -408,9 +407,11 @@ class Client12RequestResponsesTest extends RequestResponsesTest
             function($visitor, \Ex\SoapEnvelope12\Messages\GetSimpleInput $obj, array $type, Context $context) {
 
                 self::assertTrue($context->hasAttribute('soapEndpoint'), 'The "soapEndpoint" attribute was not found on the context object');
-                self::assertTrue($context->hasAttribute('soapAction'), 'The "soapAction" attribute was not found on the context object');
                 self::assertEquals('http://www.example.org/12', $context->getAttribute('soapEndpoint'));
-                self::assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapAction'));
+
+                self::assertTrue($context->hasAttribute('soapOperation'), 'The "soapOperation" attribute was not found on the context object');
+                self::assertIsArray($context->getAttribute('soapOperation'));
+                self::assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapOperation')['action']);
 
                 throw new SerializerHandlerAssertionsWereExecuted('Stop serialization, test has finished');
             }
