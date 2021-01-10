@@ -14,7 +14,6 @@ use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\Metadata\Loader\DevMetadataLoader;
 use GoetasWebservices\SoapServices\SoapClient\Client;
 use GoetasWebservices\SoapServices\SoapClient\Exception\Fault12Exception;
-use GoetasWebservices\WsdlToPhp\Tests\Generator;
 use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
@@ -405,26 +404,18 @@ class Client12RequestResponsesTest extends RequestResponsesTest
 
     public function testSerializerContextParametersAreAdded()
     {
-        // Override serializer with a custom handler for asserting the context parameters
-        $handlers = function (HandlerRegistryInterface $h) {
-            $h->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, \Ex\SoapEnvelope12\Messages\GetSimpleInput::class, 'xml',
-                function($visitor, \Ex\SoapEnvelope12\Messages\GetSimpleInput $obj, array $type, Context $context) {
+        $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, \Ex\SoapEnvelope12\Messages\GetSimpleInput::class, 'xml',
+            function($visitor, \Ex\SoapEnvelope12\Messages\GetSimpleInput $obj, array $type, Context $context) {
 
-                    self::assertTrue($context->hasAttribute('soapEndpoint'), 'The "soapEndpoint" attribute was not found on the context object');
-                    self::assertTrue($context->hasAttribute('soapAction'), 'The "soapAction" attribute was not found on the context object');
-                    self::assertEquals('http://www.example.org/12', $context->getAttribute('soapEndpoint'));
-                    self::assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapAction'));
+                self::assertTrue($context->hasAttribute('soapEndpoint'), 'The "soapEndpoint" attribute was not found on the context object');
+                self::assertTrue($context->hasAttribute('soapAction'), 'The "soapAction" attribute was not found on the context object');
+                self::assertEquals('http://www.example.org/12', $context->getAttribute('soapEndpoint'));
+                self::assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapAction'));
 
-                    throw new SerializerHandlerAssertionsWereExecuted('Stop serialization, test has finished');
-                });
-        };
-        $ref = new \ReflectionClass(Fault::class);
-        $serializer = self::$generator->buildSerializer($handlers, [
-            'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope12' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms12',
-            'GoetasWebservices\SoapServices\Metadata\Envelope\SoapEnvelope' => dirname($ref->getFileName()) . '/../../../Resources/metadata/jms',
-        ]);
+                throw new SerializerHandlerAssertionsWereExecuted('Stop serialization, test has finished');
+            }
+        );
 
-        $this->factory->setSerializer($serializer);
         $client = $this->getClient();
 
         // Assert that subscribing handler with assertions was executed
