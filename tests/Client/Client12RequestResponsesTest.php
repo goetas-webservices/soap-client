@@ -18,6 +18,8 @@ use GoetasWebservices\XML\SOAPReader\SoapReader;
 use GoetasWebservices\XML\WSDLReader\DefinitionsReader;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\ShortNamingStrategy;
 use GuzzleHttp\Psr7\Response;
+use JMS\Serializer\Context;
+use JMS\Serializer\GraphNavigator;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Client12RequestResponsesTest extends RequestResponsesTest
@@ -398,4 +400,33 @@ class Client12RequestResponsesTest extends RequestResponsesTest
             '), $detail->asXML());
         }
     }
+
+    public function testSerializerContextParametersAreAdded()
+    {
+        $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, \Ex\SoapEnvelope12\Messages\GetSimpleInput::class, 'xml',
+            function($visitor, \Ex\SoapEnvelope12\Messages\GetSimpleInput $obj, array $type, Context $context) {
+
+                $this->assertTrue($context->hasAttribute('soapEndpoint'), 'The "soapEndpoint" attribute was not found on the context object');
+                $this->assertEquals('http://www.example.org/12', $context->getAttribute('soapEndpoint'));
+
+                $this->assertTrue($context->hasAttribute('soapOperation'), 'The "soapOperation" attribute was not found on the context object');
+                $this->assertTrue(
+                    is_array($context->getAttribute('soapOperation')),
+                    'The "soapOperation" attribute is not of type array, but '.gettype($context->getAttribute('soapOperation'))
+                );
+                $this->assertEquals('http://www.example.org/test/getSimple', $context->getAttribute('soapOperation')['action']);
+
+                throw new SerializerHandlerAssertionsWereExecuted('Stop serialization, test has finished');
+            }
+        );
+
+        $client = $this->getClient();
+
+        // Assert that subscribing handler with assertions was executed
+        $this->expectException(SerializerHandlerAssertionsWereExecuted::class);
+
+        $client->getSimple('foo');
+    }
 }
+
+class SerializerHandlerAssertionsWereExecuted extends \Exception {};

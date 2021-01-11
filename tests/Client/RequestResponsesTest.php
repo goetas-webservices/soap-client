@@ -58,6 +58,11 @@ abstract class RequestResponsesTest extends TestCase
      */
     protected $factory;
 
+    /**
+     * @var HandlerRegistryInterface
+     */
+    protected $handlerRegistry;
+
     public static function setUpBeforeClass(): void
     {
         self::$generator = new Generator(self::$namespaces, [], __DIR__ . '/tmp');
@@ -81,8 +86,9 @@ abstract class RequestResponsesTest extends TestCase
             $d->addSubscriber($headerHandler);
         };
 
-        $handlers = static function (HandlerRegistryInterface $h) use ($headerHandler): void {
+        $handlers = function (HandlerRegistryInterface $h) use ($headerHandler): void {
             $h->registerSubscribingHandler($headerHandler);
+            $this->handlerRegistry = $h;
         };
 
         $serializer = self::$generator->buildSerializer($handlers, [
