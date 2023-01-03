@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration;
 
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
 use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\MethodTag;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag;
