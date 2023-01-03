@@ -55,10 +55,5 @@
   },
   "bin": [
     "bin/soap-client"
-  ],
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  }
+  ]
 }
