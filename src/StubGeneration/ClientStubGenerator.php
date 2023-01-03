@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration;
 
 use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use GoetasWebservices\SoapServices\Metadata\Headers\Header;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\MethodTag;
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag;
@@ -30,12 +31,17 @@ class ClientStubGenerator
      * @var bool
      */
     private $unwrapReturn = false;
+    /**
+     * @var Inflector
+     */
+    private $inflector;
 
     public function __construct(PhpConverter $phpConverter, NamingStrategy $namingStrategy, bool $unwrapReturn = false, array $baseNs = [])
     {
         $this->namingStrategy = $namingStrategy;
         $this->phpConverter = $phpConverter;
         $this->unwrapReturn = $unwrapReturn;
+        $this->inflector = InflectorFactory::create()->build();
     }
 
     public function setUnwrap(bool $mode = true): void
@@ -73,7 +79,7 @@ class ClientStubGenerator
 
         $namespaces = $this->phpConverter->getNamespaces();
         $class->setNamespaceName($namespaces[$portType->getDefinition()->getTargetNamespace()] . '\\SoapStubs');
-        $class->setName(Inflector::classify($portType->getName()));
+        $class->setName($this->inflector->classify($portType->getName()));
         $class->setDocblock($docBlock);
 
         foreach ($portType->getOperations() as $operation) {
@@ -88,7 +94,7 @@ class ClientStubGenerator
     {
         $types = $this->getOperationReturnTypes($operation);
         $operationTag = new MethodTag(
-            Inflector::camelize($operation->getName()),
+            $this->inflector->camelize($operation->getName()),
             $types,
             preg_replace("/[\n\r]+/", ' ', $operation->getDocumentation())
         );
