@@ -90,7 +90,9 @@
 
         <service id="goetas_webservices.xsd2php.php.class_generator"
                  class="GoetasWebservices\Xsd\XsdToPhp\Php\ClassGenerator"
-                 public="true"/>
+                 public="true">
+            <argument>%goetas_webservices.soap.strict_types%</argument>
+        </service>
 
         <service id="goetas_webservices.xsd2php.writer.jms"
                  class="GoetasWebservices\Xsd\XsdToPhp\Writer\JMSWriter"

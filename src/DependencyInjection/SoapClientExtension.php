@@ -23,6 +23,7 @@ class SoapClientExtension extends Extension
 
         $container->setParameter('goetas_webservices.soap.config', $config);
         $container->setParameter('goetas_webservices.soap.unwrap_returns', $config['unwrap_returns']);
+        $container->setParameter('goetas_webservices.soap.strict_types', $config['strict_types']);
 
         $xml = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $xml->load('services.xml');

@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+            ->booleanNode('strict_types')->defaultFalse()->end()
             ->arrayNode('alternative_endpoints')->fixXmlConfig('alternative_endpoint')
             ->prototype('array')
             ->prototype('scalar')
