@@ -27,7 +27,10 @@
     "goetas-webservices/xsd2php-runtime": "^0.2.11",
     "goetas-webservices/soap-common": "^0.2.2",
     "goetas-webservices/soap-reader": "^0.3.3",
-    "goetas-webservices/xsd2php": "^0.4.7"
+    "goetas-webservices/xsd2php": "^0.4.7",
+    "laminas/laminas-code": "^4.8",
+    "laminas/laminas-zendframework-bridge": "^1.7",
+    "doctrine/inflector": "^2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.0|^8.0",
@@ -55,5 +58,10 @@
   },
   "bin": [
     "bin/soap-client"
-  ]
+  ],
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": false
+    }
+  }
 }
