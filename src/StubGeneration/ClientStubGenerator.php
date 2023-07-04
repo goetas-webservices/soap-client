@@ -14,8 +14,8 @@ use GoetasWebservices\XML\WSDLReader\Wsdl\PortType;
 use GoetasWebservices\Xsd\XsdToPhp\Naming\NamingStrategy;
 use GoetasWebservices\Xsd\XsdToPhp\Php\PhpConverter;
 use GoetasWebservices\Xsd\XsdToPhp\Php\Structure\PHPClass;
-use Zend\Code\Generator\ClassGenerator;
-use Zend\Code\Generator\DocBlockGenerator;
+use Laminas\Code\Generator\ClassGenerator;
+use Laminas\Code\Generator\DocBlockGenerator;
 
 class ClientStubGenerator
 {
