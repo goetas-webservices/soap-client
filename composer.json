@@ -28,8 +28,8 @@
     "goetas-webservices/soap-common": "^0.2.2",
     "goetas-webservices/soap-reader": "^0.3.3",
     "goetas-webservices/xsd2php": "^0.4.7",
-    "laminas/laminas-code": "^4.8",
-    "laminas/laminas-zendframework-bridge": "^1.7",
+    "laminas/laminas-code": "^4.0|^4.8",
+    "laminas/laminas-zendframework-bridge": "^1.6|^1.7",
     "doctrine/inflector": "^2.0"
   },
   "require-dev": {
