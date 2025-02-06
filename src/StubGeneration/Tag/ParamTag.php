@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag;
 
-use Zend\Code\Generator\DocBlock\Tag\ParamTag as ParamTagTag;
+use Laminas\Code\Generator\DocBlock\Tag\ParamTag as ParamTagTag;
 
 class ParamTag extends ParamTagTag
 {
