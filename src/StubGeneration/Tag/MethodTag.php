@@ -11,8 +11,8 @@ declare(strict_types=1);
 namespace GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag;
 
 use GoetasWebservices\SoapServices\SoapClient\StubGeneration\Tag\ParamTag as SoapParamTag;
-use Zend\Code\Generator\DocBlock\Tag\MethodTag as BaseMethodTag;
-use Zend\Code\Generator\DocBlock\Tag\ParamTag;
+use Laminas\Code\Generator\DocBlock\Tag\MethodTag as BaseMethodTag;
+use Laminas\Code\Generator\DocBlock\Tag\ParamTag;
 
 class MethodTag extends BaseMethodTag
 {
