@@ -32,9 +32,5 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-      - run: composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
       - run: composer update --no-interaction --no-progress
-      # phpcs.xml.dist also points at an absolute path from the original
-      # author's machine (/home/goetas/...), which does not exist on CI, so the
-      # run is limited to the paths that exist in the repository.
       - run: vendor/bin/phpcs --standard=phpcs.xml.dist src/ tests/
